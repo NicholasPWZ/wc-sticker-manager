@@ -262,20 +262,39 @@ async def bulk_toggle(request: Request, db: Session = Depends(get_db)):
         return JSONResponse({"error": "Unauthorized"}, status_code=401)
 
     body = await request.json()
-    entries = body.get("entries", [])  # [{country, number}]
+    entries = body.get("entries", [])
+    mode = body.get("mode", "album")  # "album" | "pack"
 
     existing_keys = frozenset(
         (s.country, s.number)
         for s in db.query(AlbumSticker).filter(AlbumSticker.user_id == current_user.id).all()
     )
-    added = 0
+
+    added_album = 0
+    added_trading = 0
+
     for e in entries:
-        key = (e["country"], int(e["number"]))
-        if key not in existing_keys:
-            db.add(AlbumSticker(user_id=current_user.id, country=e["country"], number=int(e["number"])))
-            added += 1
+        country, number = e["country"], int(e["number"])
+        key = (country, number)
+
+        if mode == "pack" and key in existing_keys:
+            # Already owned → add to trading stickers
+            row = db.query(TradingSticker).filter(
+                TradingSticker.user_id == current_user.id,
+                TradingSticker.country == country,
+                TradingSticker.number == number,
+            ).first()
+            if row:
+                row.quantity += 1
+            else:
+                db.add(TradingSticker(user_id=current_user.id, country=country, number=number, quantity=1))
+            added_trading += 1
+        elif key not in existing_keys:
+            db.add(AlbumSticker(user_id=current_user.id, country=country, number=number))
+            added_album += 1
+
     db.commit()
-    return JSONResponse({"added": added, "total": len(entries)})
+    return JSONResponse({"added_album": added_album, "added_trading": added_trading, "total": len(entries)})
 
 
 @router.post("/api/sticker/trade")

@@ -115,6 +115,10 @@ function sortAlbum(mode) {
         cards.sort((a, b) =>
             a.dataset.sortName.localeCompare(b.dataset.sortName, 'pt-BR', { sensitivity: 'base' })
         );
+    } else if (mode === 'prefix') {
+        cards.sort((a, b) =>
+            a.dataset.countryCode.localeCompare(b.dataset.countryCode, 'en', { sensitivity: 'base' })
+        );
     } else {
         cards.sort((a, b) => parseInt(a.dataset.index) - parseInt(b.dataset.index));
     }
@@ -313,10 +317,20 @@ function submitTrade() {
 }
 
 // ── Bulk entry ─────────────────────────────────────────────────────────────────
+let bulkMode = 'album';
+
+function updateBulkMode() {
+    bulkMode = document.querySelector('input[name="bulk-mode"]:checked').value;
+    document.getElementById('bulk-preview').classList.add('hidden');
+}
+
 function openBulkModal() {
     document.getElementById('bulk-modal').classList.remove('hidden');
     document.getElementById('bulk-input').value = '';
     document.getElementById('bulk-preview').classList.add('hidden');
+    // Reset to album mode
+    document.querySelector('input[name="bulk-mode"][value="album"]').checked = true;
+    bulkMode = 'album';
     document.getElementById('bulk-input').focus();
 }
 
@@ -345,6 +359,14 @@ function parseBulkInput() {
     return { entries, errors };
 }
 
+function getOwnedKeys() {
+    const owned = new Set();
+    document.querySelectorAll('.sticker.checked').forEach(el => {
+        owned.add(`${el.dataset.country}|${el.dataset.number}`);
+    });
+    return owned;
+}
+
 function previewBulk() {
     const { entries, errors } = parseBulkInput();
     const preview = document.getElementById('bulk-preview');
@@ -352,17 +374,47 @@ function previewBulk() {
 
     let html = '';
     if (errors.length) html += errors.map(e => `<div class="bulk-preview-row bulk-err">⚠ ${e}</div>`).join('');
+
     if (entries.length) {
-        html += `<div class="bulk-preview-row bulk-ok">✔ ${entries.length} figurinha(s) encontradas:</div>`;
-        // group by country
-        const byCountry = {};
-        entries.forEach(e => { byCountry[e.country] = (byCountry[e.country] || []); byCountry[e.country].push(e.number); });
-        Object.entries(byCountry).forEach(([c, nums]) => {
-            html += `<div class="bulk-preview-row">&nbsp;&nbsp;${c.split('(')[0]?.trim()}: ${nums.join(', ')}</div>`;
-        });
+        if (bulkMode === 'pack') {
+            const owned = getOwnedKeys();
+            const toAlbum = entries.filter(e => !owned.has(`${e.country}|${e.number}`));
+            const toTrading = entries.filter(e => owned.has(`${e.country}|${e.number}`));
+
+            if (toAlbum.length) {
+                html += `<div class="bulk-preview-row bulk-ok">📘 Para o álbum (${toAlbum.length}):</div>`;
+                const byC = groupByCountry(toAlbum);
+                Object.entries(byC).forEach(([c, nums]) => {
+                    html += `<div class="bulk-preview-row">&nbsp;&nbsp;${shortName(c)}: ${nums.join(', ')}</div>`;
+                });
+            }
+            if (toTrading.length) {
+                html += `<div class="bulk-preview-row bulk-trading">🔄 Para repetidas (${toTrading.length}):</div>`;
+                const byC = groupByCountry(toTrading);
+                Object.entries(byC).forEach(([c, nums]) => {
+                    html += `<div class="bulk-preview-row">&nbsp;&nbsp;${shortName(c)}: ${nums.join(', ')}</div>`;
+                });
+            }
+        } else {
+            html += `<div class="bulk-preview-row bulk-ok">📘 ${entries.length} figurinha(s):</div>`;
+            Object.entries(groupByCountry(entries)).forEach(([c, nums]) => {
+                html += `<div class="bulk-preview-row">&nbsp;&nbsp;${shortName(c)}: ${nums.join(', ')}</div>`;
+            });
+        }
     }
+
     if (!entries.length && !errors.length) html = '<div class="bulk-preview-row">Nenhuma figurinha encontrada.</div>';
     preview.innerHTML = html;
+}
+
+function groupByCountry(entries) {
+    const map = {};
+    entries.forEach(e => { (map[e.country] = map[e.country] || []).push(e.number); });
+    return map;
+}
+
+function shortName(country) {
+    return country.includes('(') ? country.split('(')[0].trim() : country;
 }
 
 function submitBulk() {
@@ -372,22 +424,30 @@ function submitBulk() {
     fetch('/api/sticker/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entries }),
+        body: JSON.stringify({ entries, mode: bulkMode }),
     })
         .then(r => r.json())
         .then(data => {
             closeBulkModal();
-            showToast(`${data.added} nova(s) de ${data.total} marcada(s)!`);
-            // Update UI: mark stickers as checked
+
+            if (bulkMode === 'pack') {
+                showToast(`📘 ${data.added_album} no álbum · 🔄 ${data.added_trading} em repetidas!`);
+            } else {
+                showToast(`📘 ${data.added_album} figurinha(s) marcada(s)!`);
+            }
+
+            // Update album UI for newly owned stickers
             entries.forEach(({ country, number }) => {
+                const key = `${country}|${number}`;
                 const selector = `.sticker[data-country="${CSS.escape(country)}"][data-number="${number}"]`;
-                document.querySelectorAll(selector).forEach(el => {
-                    if (!el.classList.contains('checked')) {
+                const owned = getOwnedKeys().has(key);
+                if (!owned) {
+                    document.querySelectorAll(selector).forEach(el => {
                         el.classList.add('checked');
                         el.classList.remove('wished');
                         updateCountryCount(el.closest('.country-card'));
-                    }
-                });
+                    });
+                }
             });
             updateGlobalStats();
         })

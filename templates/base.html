@@ -118,11 +118,31 @@
         <h3 class="modal-title">Entrada em Massa</h3>
         <p class="modal-hint">Uma linha por país. Código de 3 letras + números separados por espaço.<br>
         Ex: <code>BRA 3 7 12 15</code></p>
+
+        <div class="bulk-mode-toggle">
+            <label class="mode-option" id="mode-album-label">
+                <input type="radio" name="bulk-mode" value="album" checked onchange="updateBulkMode()">
+                <span class="mode-icon">📘</span>
+                <div>
+                    <strong>Só álbum</strong>
+                    <small>Marca apenas o que você não tem</small>
+                </div>
+            </label>
+            <label class="mode-option" id="mode-pack-label">
+                <input type="radio" name="bulk-mode" value="pack" onchange="updateBulkMode()">
+                <span class="mode-icon">📦</span>
+                <div>
+                    <strong>Modo pacote</strong>
+                    <small>Novas → álbum · Repetidas → trading</small>
+                </div>
+            </label>
+        </div>
+
         <textarea id="bulk-input" class="bulk-textarea" placeholder="BRA 3 7 12 15&#10;MEX 5 8&#10;ARG 1 4 19"></textarea>
         <div class="bulk-preview hidden" id="bulk-preview"></div>
         <div class="modal-actions">
             <button class="btn-secondary" onclick="previewBulk()">Pré-visualizar</button>
-            <button class="btn-primary" onclick="submitBulk()">Marcar Figurinhas</button>
+            <button class="btn-primary" onclick="submitBulk()">Confirmar</button>
         </div>
     </div>
 </div>
