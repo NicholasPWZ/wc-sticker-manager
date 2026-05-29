@@ -120,19 +120,27 @@
         Ex: <code>BRA 3 7 12 15</code></p>
 
         <div class="bulk-mode-toggle">
-            <label class="mode-option" id="mode-album-label">
+            <label class="mode-option">
                 <input type="radio" name="bulk-mode" value="album" checked onchange="updateBulkMode()">
                 <span class="mode-icon">📘</span>
                 <div>
-                    <strong>Só álbum</strong>
-                    <small>Marca apenas o que você não tem</small>
+                    <strong>Tenho</strong>
+                    <small>Marca as figurinhas digitadas</small>
                 </div>
             </label>
-            <label class="mode-option" id="mode-pack-label">
+            <label class="mode-option">
+                <input type="radio" name="bulk-mode" value="inverse" onchange="updateBulkMode()">
+                <span class="mode-icon">🔁</span>
+                <div>
+                    <strong>Faltam</strong>
+                    <small>Marca tudo exceto as digitadas</small>
+                </div>
+            </label>
+            <label class="mode-option">
                 <input type="radio" name="bulk-mode" value="pack" onchange="updateBulkMode()">
                 <span class="mode-icon">📦</span>
                 <div>
-                    <strong>Modo pacote</strong>
+                    <strong>Pacote</strong>
                     <small>Novas → álbum · Repetidas → trading</small>
                 </div>
             </label>

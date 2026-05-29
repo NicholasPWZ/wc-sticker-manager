@@ -376,22 +376,29 @@ function previewBulk() {
     if (errors.length) html += errors.map(e => `<div class="bulk-preview-row bulk-err">⚠ ${e}</div>`).join('');
 
     if (entries.length) {
-        if (bulkMode === 'pack') {
+        if (bulkMode === 'inverse') {
+            const skipByCountry = groupByCountry(entries);
+            let totalWillMark = 0;
+            Object.entries(skipByCountry).forEach(([country, missingNums]) => {
+                const total = getStickerCount(country);
+                const willMark = total - missingNums.length;
+                totalWillMark += willMark;
+                html += `<div class="bulk-preview-row bulk-ok">🔁 ${shortName(country)}: marca ${willMark} (exceto ${missingNums.sort((a,b)=>a-b).join(', ')})</div>`;
+            });
+            html = `<div class="bulk-preview-row bulk-ok">📘 Total: ~${totalWillMark} figurinhas serão marcadas</div>` + html;
+        } else if (bulkMode === 'pack') {
             const owned = getOwnedKeys();
             const toAlbum = entries.filter(e => !owned.has(`${e.country}|${e.number}`));
             const toTrading = entries.filter(e => owned.has(`${e.country}|${e.number}`));
-
             if (toAlbum.length) {
                 html += `<div class="bulk-preview-row bulk-ok">📘 Para o álbum (${toAlbum.length}):</div>`;
-                const byC = groupByCountry(toAlbum);
-                Object.entries(byC).forEach(([c, nums]) => {
+                Object.entries(groupByCountry(toAlbum)).forEach(([c, nums]) => {
                     html += `<div class="bulk-preview-row">&nbsp;&nbsp;${shortName(c)}: ${nums.join(', ')}</div>`;
                 });
             }
             if (toTrading.length) {
                 html += `<div class="bulk-preview-row bulk-trading">🔄 Para repetidas (${toTrading.length}):</div>`;
-                const byC = groupByCountry(toTrading);
-                Object.entries(byC).forEach(([c, nums]) => {
+                Object.entries(groupByCountry(toTrading)).forEach(([c, nums]) => {
                     html += `<div class="bulk-preview-row">&nbsp;&nbsp;${shortName(c)}: ${nums.join(', ')}</div>`;
                 });
             }
@@ -417,6 +424,11 @@ function shortName(country) {
     return country.includes('(') ? country.split('(')[0].trim() : country;
 }
 
+function getStickerCount(country) {
+    const card = document.querySelector(`.country-card[data-country-name="${CSS.escape(country.toLowerCase())}"]`);
+    return card ? card.querySelectorAll('.sticker').length : 20;
+}
+
 function submitBulk() {
     const { entries, errors } = parseBulkInput();
     if (!entries.length) { showToast('Nenhuma figurinha válida encontrada.'); return; }
@@ -436,19 +448,34 @@ function submitBulk() {
                 showToast(`📘 ${data.added_album} figurinha(s) marcada(s)!`);
             }
 
-            // Update album UI for newly owned stickers
-            entries.forEach(({ country, number }) => {
-                const key = `${country}|${number}`;
-                const selector = `.sticker[data-country="${CSS.escape(country)}"][data-number="${number}"]`;
-                const owned = getOwnedKeys().has(key);
-                if (!owned) {
-                    document.querySelectorAll(selector).forEach(el => {
-                        el.classList.add('checked');
-                        el.classList.remove('wished');
-                        updateCountryCount(el.closest('.country-card'));
+            if (bulkMode === 'inverse') {
+                // Mark all stickers per mentioned country EXCEPT the entered ones
+                const skipByCountry = groupByCountry(entries);
+                Object.entries(skipByCountry).forEach(([country, skipNums]) => {
+                    const skipSet = new Set(skipNums);
+                    const card = document.querySelector(`.country-card[data-country-name="${CSS.escape(country.toLowerCase())}"]`);
+                    if (!card) return;
+                    card.querySelectorAll('.sticker').forEach(el => {
+                        if (!skipSet.has(parseInt(el.dataset.number)) && !el.classList.contains('checked')) {
+                            el.classList.add('checked');
+                            el.classList.remove('wished');
+                        }
                     });
-                }
-            });
+                    updateCountryCount(card);
+                });
+            } else {
+                // Mark entered stickers as owned
+                entries.forEach(({ country, number }) => {
+                    const selector = `.sticker[data-country="${CSS.escape(country)}"][data-number="${number}"]`;
+                    document.querySelectorAll(selector).forEach(el => {
+                        if (!el.classList.contains('checked')) {
+                            el.classList.add('checked');
+                            el.classList.remove('wished');
+                            updateCountryCount(el.closest('.country-card'));
+                        }
+                    });
+                });
+            }
             updateGlobalStats();
         })
         .catch(() => showToast('Erro ao salvar.'));

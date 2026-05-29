@@ -266,7 +266,7 @@ button, a { touch-action: manipulation; }
 .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
 
 /* Bulk entry */
-.bulk-mode-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+.bulk-mode-toggle { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
 .mode-option { flex: 1; display: flex; align-items: center; gap: 10px; border: 2px solid var(--border); border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; background: var(--bg); }
 .mode-option:has(input:checked) { border-color: var(--primary); background: #eef2ff; }
 [data-theme="dark"] .mode-option:has(input:checked) { background: #1a2040; }

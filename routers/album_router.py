@@ -275,25 +275,41 @@ async def bulk_toggle(request: Request, db: Session = Depends(get_db)):
     added_album = 0
     added_trading = 0
 
-    for e in entries:
-        country, number = e["country"], int(e["number"])
-        key = (country, number)
+    if mode == "inverse":
+        # entries = stickers the user is MISSING; mark everything else as owned
+        skip_by_country: dict[str, set] = {}
+        for e in entries:
+            skip_by_country.setdefault(e["country"], set()).add(int(e["number"]))
 
-        if mode == "pack" and key in existing_keys:
-            # Already owned → add to trading stickers
-            row = db.query(TradingSticker).filter(
-                TradingSticker.user_id == current_user.id,
-                TradingSticker.country == country,
-                TradingSticker.number == number,
-            ).first()
-            if row:
-                row.quantity += 1
-            else:
-                db.add(TradingSticker(user_id=current_user.id, country=country, number=number, quantity=1))
-            added_trading += 1
-        elif key not in existing_keys:
-            db.add(AlbumSticker(user_id=current_user.id, country=country, number=number))
-            added_album += 1
+        for country, skip_nums in skip_by_country.items():
+            info = STICKERS.get(country)
+            if not info:
+                continue
+            for num in range(1, info["count"] + 1):
+                if num in skip_nums:
+                    continue
+                if (country, num) not in existing_keys:
+                    db.add(AlbumSticker(user_id=current_user.id, country=country, number=num))
+                    added_album += 1
+    else:
+        for e in entries:
+            country, number = e["country"], int(e["number"])
+            key = (country, number)
+
+            if mode == "pack" and key in existing_keys:
+                row = db.query(TradingSticker).filter(
+                    TradingSticker.user_id == current_user.id,
+                    TradingSticker.country == country,
+                    TradingSticker.number == number,
+                ).first()
+                if row:
+                    row.quantity += 1
+                else:
+                    db.add(TradingSticker(user_id=current_user.id, country=country, number=number, quantity=1))
+                added_trading += 1
+            elif key not in existing_keys:
+                db.add(AlbumSticker(user_id=current_user.id, country=country, number=number))
+                added_album += 1
 
     db.commit()
     return JSONResponse({"added_album": added_album, "added_trading": added_trading, "total": len(entries)})
