@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Álbum da Copa{% endblock %}</title>
+    <script>
+        (function() {
+            const t = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+    <header class="app-header">
+        <div class="header-brand">🏆 Álbum da Copa</div>
+
+        <div class="header-actions">
+            {% block header_actions %}{% endblock %}
+
+            <button class="icon-btn" id="theme-btn" onclick="toggleDarkMode()" title="Alternar tema">🌙</button>
+
+            <div class="notif-wrapper">
+                <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()">
+                    🔔
+                    {% if notif_count > 0 %}
+                    <span class="badge" id="notif-badge">{{ notif_count }}</span>
+                    {% else %}
+                    <span class="badge hidden" id="notif-badge">0</span>
+                    {% endif %}
+                </button>
+                <div class="notif-panel hidden" id="notif-panel">
+                    <p class="notif-title">Notificações</p>
+                    <div id="notif-list">
+                        {% if notif_count == 0 %}
+                        <p class="notif-empty">Nenhuma notificação</p>
+                        {% else %}
+                        <p class="notif-empty">Você tem {{ notif_count }} troca(s) pendente(s).</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-chip">
+                <span class="user-avatar-sm">{{ current_user.display_name[0] | upper }}</span>
+                <span class="user-chip-name">{{ current_user.display_name }}</span>
+                <a href="/logout" class="logout-link">Sair</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout-body">
+        <aside class="sidebar">
+            <p class="sidebar-title">Usuários</p>
+            {% for u in all_users %}
+            <a href="/album/{{ u.id }}"
+               class="sidebar-user {% if u.id == album_owner.id %}active{% endif %}">
+                <div class="user-avatar">{{ u.display_name[0] | upper }}</div>
+                <div class="user-info">
+                    <span class="username">{{ u.display_name }}</span>
+                    <span class="completion">{{ u.completion }}%</span>
+                </div>
+            </a>
+            {% endfor %}
+        </aside>
+
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+<!-- Trade modal -->
+<div class="modal-overlay hidden" id="trade-modal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeTradeModal()">✕</button>
+        <h3 class="modal-title">Propor Troca</h3>
+        <div class="modal-section">
+            <label>Você quer:</label>
+            <div class="trade-want-label" id="modal-want-label">—</div>
+        </div>
+        <div class="modal-section">
+            <label>Você oferece <span class="label-hint">(suas repetidas — ⭐ = eles precisam)</span>:</label>
+            <div id="modal-offer-list" class="offer-list"></div>
+        </div>
+        <div class="modal-section">
+            <label>Nota (opcional):</label>
+            <input type="text" id="modal-note" class="modal-input" placeholder="Ex: pode ser pessoalmente na quarta">
+        </div>
+        <button class="btn-primary" onclick="submitTrade()">Enviar Pedido</button>
+    </div>
+</div>
+
+<!-- Bulk entry modal -->
+<div class="modal-overlay hidden" id="bulk-modal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeBulkModal()">✕</button>
+        <h3 class="modal-title">Entrada em Massa</h3>
+        <p class="modal-hint">Uma linha por país. Código de 3 letras + números separados por espaço.<br>
+        Ex: <code>BRA 3 7 12 15</code></p>
+        <textarea id="bulk-input" class="bulk-textarea" placeholder="BRA 3 7 12 15&#10;MEX 5 8&#10;ARG 1 4 19"></textarea>
+        <div class="bulk-preview hidden" id="bulk-preview"></div>
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="previewBulk()">Pré-visualizar</button>
+            <button class="btn-primary" onclick="submitBulk()">Marcar Figurinhas</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script>
+    const CURRENT_USER_ID = {{ current_user.id }};
+    const ALBUM_OWNER_ID = {{ album_owner.id }};
+</script>
+<script src="/static/app.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

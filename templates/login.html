@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Álbum da Copa</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="auth-body">
+    <div class="auth-card">
+        <div class="auth-logo">🏆</div>
+        <h1 class="auth-title">Álbum da Copa</h1>
+        <p class="auth-subtitle">Faça login para ver seu álbum</p>
+
+        {% if error %}
+        <div class="auth-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/login" class="auth-form">
+            <label>Usuário</label>
+            <input type="text" name="username" required autofocus placeholder="seu_usuario">
+
+            <label>Senha</label>
+            <input type="password" name="password" required placeholder="••••••••">
+
+            <button type="submit" class="btn-primary btn-block">Entrar</button>
+        </form>
+
+        <p class="auth-link">Não tem conta? <a href="/register">Criar conta</a></p>
+    </div>
+</body>
+</html>

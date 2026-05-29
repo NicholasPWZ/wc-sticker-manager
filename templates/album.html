@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}Álbum de {{ album_owner.display_name }}{% endblock %}
+
+{% block header_actions %}
+{% if is_own_album %}
+<button class="btn-edit" id="edit-btn" onclick="toggleEditMode()">✏️ Editar</button>
+<button class="btn-edit" id="wish-btn" onclick="toggleWishlistMode()">⭐ Desejos</button>
+<button class="btn-edit" onclick="openBulkModal()">📋 Entrada</button>
+{% else %}
+<span class="viewing-label">Álbum de <strong>{{ album_owner.display_name }}</strong></span>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- ── Album header ── -->
+<div class="album-header">
+    <div class="album-title-row">
+        <h2>{% if is_own_album %}Meu Álbum{% else %}Álbum de {{ album_owner.display_name }}{% endif %}</h2>
+        <div class="header-controls">
+            <div class="sort-controls">
+                <button class="sort-btn active" data-mode="album" onclick="sortAlbum('album')">📋 Álbum</button>
+                <button class="sort-btn" data-mode="alpha" onclick="sortAlbum('alpha')">A–Z</button>
+            </div>
+            {% if is_own_album %}
+            <div class="view-controls">
+                <button class="sort-btn active" data-view="cards" onclick="setView('cards')">🗂 Cards</button>
+                <button class="sort-btn" data-view="missing" onclick="setView('missing')">🔍 Faltantes</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Search bar -->
+    <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Buscar país ou código (ex: bra, 12)…"
+               oninput="filterAlbum(this.value)">
+        <button class="search-clear hidden" id="search-clear" onclick="clearSearch()">✕</button>
+    </div>
+
+    <!-- Stats chips -->
+    <div class="stats-chips">
+        <span class="chip chip-blue">📘 {{ stats.owned }}/{{ stats.total }}</span>
+        <span class="chip chip-orange">🔄 {{ stats.trading }}</span>
+        <span class="chip chip-purple">📦 {{ stats.full }}</span>
+        <span class="chip chip-green">🎲 {{ stats.probability }}%/pacote</span>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar" style="width: {{ (stats.owned / stats.total * 100) | round(1) }}%"></div>
+    </div>
+    <span class="progress-label" id="progress-label">
+        {{ stats.owned }} de {{ stats.total }} figurinhas ({{ (stats.owned / stats.total * 100) | round(1) }}%). Faltam {{ stats.total - stats.owned }}!
+    </span>
+</div>
+
+<!-- ── Missing list view (own album only) ── -->
+{% if is_own_album %}
+<div class="missing-view hidden" id="missing-view">
+    <h3 class="missing-view-title">🔍 Faltam {{ stats.total - stats.owned }} figurinhas</h3>
+    {% if missing_by_country %}
+    <div class="missing-list">
+        {% for country in missing_by_country %}
+        <div class="missing-row">
+            <span class="missing-country">
+                {% if country.code == 'fwc' %}🏆
+                {% elif country.code == 'coca' %}🥤
+                {% else %}<img class="flag-img-sm" src="https://flagcdn.com/w20/{{ country.code }}.png" alt="">{% endif %}
+                {{ country.name }}
+            </span>
+            <span class="missing-nums">{{ country.missing | join(', ') }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="trades-empty">🎉 Álbum completo!</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- ── Country cards ── -->
+<div class="album-list" id="album-list">
+{% for country in sticker_data %}
+{% if '(' in country.name %}
+  {% set sort_name = country.name.split('(')[1].rstrip(')').strip() %}
+{% else %}
+  {% set sort_name = country.name %}
+{% endif %}
+<div class="country-card" data-index="{{ loop.index0 }}" data-sort-name="{{ sort_name }}"
+     data-country-name="{{ country.name | lower }}" data-country-code="{{ country.name.split('(')[0].strip() | lower if '(' in country.name else country.name | lower }}">
+
+    <div class="country-header" onclick="toggleCountry(this)">
+        <span class="country-chevron">▶</span>
+        <span class="country-name">
+            {% if country.code == 'fwc' %}<span class="flag-emoji">🏆</span>
+            {% elif country.code == 'coca' %}<span class="flag-emoji">🥤</span>
+            {% else %}<img class="flag-img" src="https://flagcdn.com/w40/{{ country.code }}.png" alt="">{% endif %}
+            {{ country.name }}
+        </span>
+        <div class="country-meta">
+            <span class="country-count" id="cnt-{{ loop.index }}">{{ country.owned_count }}/{{ country.count }}</span>
+            <button class="btn-repetidas" onclick="toggleRepetidas(this); event.stopPropagation()">
+                🔄 <span class="rep-count">({{ country.trading_count }})</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sticker grid -->
+    <div class="stickers-grid hidden">
+        {% for num in range(1, country.count + 1) %}
+        {% set is_owned = num in country.owned %}
+        {% set is_wished = num in country.wishlist %}
+        <div class="sticker {% if is_owned %}checked{% elif is_wished %}wished{% endif %}"
+             data-country="{{ country.name }}" data-number="{{ num }}"
+             onclick="handleStickerClick(this)">{{ num }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Repetidas section -->
+    <div class="repetidas-section hidden">
+        <p class="rep-label">
+            {% if is_own_album %}+/− para registrar repetidas{% else %}Disponíveis para troca{% endif %}
+        </p>
+        <div class="rep-grid">
+            {% for num in range(1, country.count + 1) %}
+            {% set qty = country.trading.get(num, 0) %}
+            {% set i_need_item = (not is_own_album) and ((country.name ~ '|' ~ num) not in my_owned_keys) and qty > 0 %}
+            <div class="rep-item {% if qty > 0 %}has-stock{% endif %} {% if i_need_item %}i-need{% endif %}"
+                 data-country="{{ country.name }}" data-number="{{ num }}">
+                <span class="rep-num">{{ num }}</span>
+                {% if is_own_album %}
+                <div class="rep-controls">
+                    <button class="rep-btn" onclick="updateTrading('{{ country.name }}', {{ num }}, -1, this)">−</button>
+                    <span class="rep-qty">{{ qty }}</span>
+                    <button class="rep-btn" onclick="updateTrading('{{ country.name }}', {{ num }}, 1, this)">+</button>
+                </div>
+                {% else %}
+                <div class="rep-controls">
+                    <span class="rep-qty-view">{{ qty }}</span>
+                    {% if qty > 0 %}
+                    <button class="btn-trade-sm {% if i_need_item %}btn-trade-need{% endif %}"
+                            onclick="openTradeModal({{ album_owner.id }}, '{{ country.name }}', {{ num }}, {{ qty }})">🔄</button>
+                    {% endif %}
+                </div>
+                {% if i_need_item %}<span class="need-badge">falta</span>{% endif %}
+                {% if num in country.wishlist %}<span class="wish-badge">⭐ quer</span>{% endif %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+
+<!-- ── Match finder (own album only) ── -->
+{% if is_own_album and matches %}
+<section class="matches-section">
+    <button class="section-toggle-btn" onclick="toggleSection('matches-body', this)">
+        🤝 Matches de Troca <span class="match-count">({{ matches | length }})</span> ▶
+    </button>
+    <div class="matches-body hidden" id="matches-body">
+        {% for m in matches %}
+        <div class="match-card {% if m.mutual %}match-mutual{% endif %}">
+            <div class="match-header">
+                <div class="user-avatar-sm-inline">{{ m.display_name[0] | upper }}</div>
+                <strong>{{ m.display_name }}</strong>
+                {% if m.mutual %}<span class="mutual-badge">🔄 Match mútuo!</span>{% endif %}
+            </div>
+            {% if m.they_give %}
+            <div class="match-row">
+                <span class="match-label">Pode te dar ({{ m.they_give_total }}):</span>
+                <span class="match-stickers">
+                    {% for c, n in m.they_give %}
+                    <span class="trade-chip">{{ c.split('(')[0].strip() if '(' in c else c }} #{{ n }}</span>
+                    {% endfor %}
+                    {% if m.they_give_total > m.they_give | length %}<span class="trade-chip muted">+{{ m.they_give_total - (m.they_give | length) }}</span>{% endif %}
+                </span>
+            </div>
+            {% endif %}
+            {% if m.i_give %}
+            <div class="match-row">
+                <span class="match-label">Você pode dar ({{ m.i_give_total }}):</span>
+                <span class="match-stickers">
+                    {% for c, n in m.i_give %}
+                    <span class="trade-chip muted">{{ c.split('(')[0].strip() if '(' in c else c }} #{{ n }}</span>
+                    {% endfor %}
+                    {% if m.i_give_total > m.i_give | length %}<span class="trade-chip muted">+{{ m.i_give_total - (m.i_give | length) }}</span>{% endif %}
+                </span>
+            </div>
+            {% endif %}
+            {% if m.they_give %}
+            <button class="btn-trade-sm match-trade-btn"
+                    onclick="openTradeModal({{ m.user_id }}, '{{ m.they_give[0][0] }}', {{ m.they_give[0][1] }}, 1)">
+                🔄 Propor Troca
+            </button>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- ── Trades section (own album only) ── -->
+{% if is_own_album %}
+<section class="trades-section" id="trades-section">
+    <h2 class="section-title">Trocas</h2>
+
+    {% if incoming_trades %}
+    <h3 class="trades-subtitle">📥 Recebidos</h3>
+    {% for trade in incoming_trades %}
+    <div class="trade-card" id="trade-{{ trade.id }}">
+        <div class="trade-header">
+            <strong>{{ trade.requester.display_name }}</strong> quer trocar
+            <span class="trade-date">{{ trade.created_at.strftime('%d/%m %H:%M') }}</span>
+        </div>
+        <div class="trade-items">
+            <div class="trade-col">
+                <span class="trade-col-title">Ele quer de você:</span>
+                {% for item in trade.items if item.direction == 'want' %}
+                <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                {% endfor %}
+            </div>
+            <div class="trade-col">
+                <span class="trade-col-title">Ele oferece:</span>
+                {% for item in trade.items if item.direction == 'offer' %}
+                <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% if trade.note %}<p class="trade-note">"{{ trade.note }}"</p>{% endif %}
+        <div class="trade-actions">
+            {% if not trade.recipient_finalized %}
+            <button class="btn-finalize" onclick="finalizeTrade({{ trade.id }}, this)">✔ Finalizar</button>
+            {% else %}
+            <span class="trade-waiting">Aguardando {{ trade.requester.display_name }}…</span>
+            {% endif %}
+            <button class="btn-archive" onclick="archiveTrade({{ trade.id }}, this)">✕ Cancelar</button>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if outgoing_trades %}
+    <h3 class="trades-subtitle">📤 Enviados</h3>
+    {% for trade in outgoing_trades %}
+    <div class="trade-card" id="trade-{{ trade.id }}">
+        <div class="trade-header">
+            Para <strong>{{ trade.recipient.display_name }}</strong>
+            <span class="trade-date">{{ trade.created_at.strftime('%d/%m %H:%M') }}</span>
+        </div>
+        <div class="trade-items">
+            <div class="trade-col">
+                <span class="trade-col-title">Você quer:</span>
+                {% for item in trade.items if item.direction == 'want' %}
+                <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                {% endfor %}
+            </div>
+            <div class="trade-col">
+                <span class="trade-col-title">Você oferece:</span>
+                {% for item in trade.items if item.direction == 'offer' %}
+                <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% if trade.note %}<p class="trade-note">"{{ trade.note }}"</p>{% endif %}
+        <div class="trade-actions">
+            {% if not trade.requester_finalized %}
+            <button class="btn-finalize" onclick="finalizeTrade({{ trade.id }}, this)">✔ Finalizar minha parte</button>
+            {% else %}
+            <span class="trade-waiting">Aguardando {{ trade.recipient.display_name }}…</span>
+            {% endif %}
+            <button class="btn-archive" onclick="archiveTrade({{ trade.id }}, this)">✕ Cancelar</button>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if not incoming_trades and not outgoing_trades %}
+    <p class="trades-empty">Nenhuma troca pendente.</p>
+    {% endif %}
+
+    <button class="btn-past-trades" onclick="togglePastTrades()">📋 Trocas Passadas</button>
+    <div class="past-trades-section hidden" id="past-trades-section">
+        {% if past_trades %}
+        {% for trade in past_trades %}
+        <div class="trade-card trade-past">
+            <div class="trade-header">
+                {% if trade.requester_id == current_user.id %}Com <strong>{{ trade.recipient.display_name }}</strong>
+                {% else %}Com <strong>{{ trade.requester.display_name }}</strong>{% endif %}
+                <span class="trade-status-chip {% if trade.is_completed %}completed{% else %}archived{% endif %}">
+                    {{ 'Concluída' if trade.is_completed else 'Cancelada' }}
+                </span>
+                <span class="trade-date">{{ trade.created_at.strftime('%d/%m/%Y') }}</span>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="trades-empty">Nenhuma troca passada.</p>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const IS_OWN_ALBUM = {{ 'true' if is_own_album else 'false' }};
+    const MY_TRADING = {{ my_trading | tojson }};
+    const OWNER_MISSING_KEYS = new Set({{ owner_missing_keys | tojson }});
+    const COUNTRY_CODES = {{ code_to_country | tojson }};
+</script>
+{% endblock %}

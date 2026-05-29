@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta — Álbum da Copa</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="auth-body">
+    <div class="auth-card">
+        <div class="auth-logo">🏆</div>
+        <h1 class="auth-title">Criar Conta</h1>
+        <p class="auth-subtitle">Entre no grupo e comece seu álbum</p>
+
+        {% if error %}
+        <div class="auth-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/register" class="auth-form">
+            <label>Nome (aparece para os outros)</label>
+            <input type="text" name="display_name" required autofocus placeholder="Ex: Nicho e Duda" maxlength="40">
+
+            <label>Usuário (para login)</label>
+            <input type="text" name="username" required placeholder="ex: nichoeduda" minlength="3" pattern="[a-z0-9_]+" title="Só letras minúsculas, números e _">
+
+            <label>E-mail</label>
+            <input type="email" name="email" required placeholder="voce@email.com">
+
+            <label>Senha</label>
+            <input type="password" name="password" required placeholder="••••••••" minlength="6">
+
+            <button type="submit" class="btn-primary btn-block">Criar Conta</button>
+        </form>
+
+        <p class="auth-link">Já tem conta? <a href="/login">Fazer login</a></p>
+    </div>
+</body>
+</html>
