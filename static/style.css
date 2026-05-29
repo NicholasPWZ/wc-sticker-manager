@@ -1,17 +1,18 @@
-/* ── Design tokens ────────────────────────────────────────────────────────── */
+/* ── Design tokens — FIFA World Cup 2026 ──────────────────────────────────── */
 :root {
-    --primary: #8a1538;
-    --primary-light: #b01d48;
-    --accent: #4caf50;
-    --accent-dark: #388e3c;
-    --orange: #f57c00;
-    --purple: #7b1fa2;
+    --primary: #0B2265;
+    --primary-light: #1a3a8f;
+    --accent: #00A651;
+    --accent-dark: #007A3D;
+    --orange: #F5C518;
+    --purple: #6a0dad;
     --blue: #1565c0;
-    --bg: #f0f2f5;
+    --red: #D4001A;
+    --bg: #f0f4f8;
     --card-bg: #ffffff;
-    --border: #e0e0e0;
-    --text: #333333;
-    --text-muted: #888888;
+    --border: #dde3ec;
+    --text: #1a2332;
+    --text-muted: #8293a8;
     --input-bg: #ffffff;
     --sidebar-w: 210px;
     --header-h: 54px;
@@ -19,16 +20,17 @@
 }
 
 [data-theme="dark"] {
-    --bg: #111317;
-    --card-bg: #1c1f26;
-    --border: #2a2d35;
-    --text: #e2e4ea;
-    --text-muted: #7a7f8e;
-    --input-bg: #23272f;
+    --bg: #080d18;
+    --card-bg: #0f1626;
+    --border: #1e2a40;
+    --text: #e2e8f0;
+    --text-muted: #8293a8;
+    --input-bg: #0f1626;
     --blue: #5c9ef0;
-    --accent: #4caf50;
-    --orange: #f0943a;
+    --accent: #00c860;
+    --orange: #F5C518;
     --purple: #b57bee;
+    --red: #ff4d6a;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,7 +40,7 @@ button, a { touch-action: manipulation; }
 .hidden { display: none !important; }
 
 /* ── Auth ─────────────────────────────────────────────────────────────────── */
-.auth-body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, var(--primary) 0%, #c62828 100%); }
+.auth-body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(160deg, #0B2265 0%, #1a3a8f 40%, #0d6b3a 100%); }
 .auth-card { background: var(--card-bg); border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
 .auth-logo { font-size: 48px; text-align: center; margin-bottom: 8px; }
 .auth-title { font-size: 22px; font-weight: 700; text-align: center; color: var(--primary); }
@@ -53,7 +55,7 @@ button, a { touch-action: manipulation; }
 /* ── App shell ────────────────────────────────────────────────────────────── */
 .app-wrapper { display: grid; grid-template-rows: var(--header-h) 1fr; grid-template-columns: var(--sidebar-w) 1fr; height: 100vh; }
 
-.app-header { grid-column: 1/-1; display: flex; align-items: center; justify-content: space-between; background: var(--primary); color: white; padding: 0 16px; height: var(--header-h); box-shadow: 0 2px 8px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 100; gap: 8px; }
+.app-header { grid-column: 1/-1; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, #0B2265 0%, #1a3a8f 50%, #0B2265 100%); color: white; padding: 0 14px; height: var(--header-h); box-shadow: 0 2px 12px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; gap: 8px; overflow: hidden; }
 .header-brand { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; white-space: nowrap; }
 .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; overflow: hidden; }
 
@@ -305,11 +307,13 @@ button, a { touch-action: manipulation; }
     /* Header */
     .hamburger { display: flex; }
     .header-edit-group { display: none; }
-    .brand-text { font-size: 14px; }
+    .viewing-label { display: none; }
+    .brand-text { font-size: 13px; }
     .user-chip-name { display: none; }
     .logout-link { display: none; }
     .icon-btn { font-size: 16px; padding: 3px 5px; }
     .notif-btn { font-size: 18px; }
+    .header-actions { gap: 6px; flex-shrink: 0; }
 
     /* Sidebar as drawer */
     .sidebar {
@@ -389,9 +393,12 @@ button, a { touch-action: manipulation; }
 
     /* Album header */
     .album-title-row { flex-direction: column; align-items: flex-start; gap: 6px; }
-    .header-controls { width: 100%; }
+    .album-title-row h2 { font-size: 16px; }
+    .header-controls { width: 100%; justify-content: space-between; }
     .sort-controls, .view-controls { flex: 1; }
-    .sort-btn { flex: 1; justify-content: center; text-align: center; }
+    .sort-btn { flex: 1; text-align: center; font-size: 11px; padding: 5px 4px; }
+    .stats-chips { gap: 4px; }
+    .chip { font-size: 10px; padding: 3px 7px; }
 }
 
 /* Very small screens */
