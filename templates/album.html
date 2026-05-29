@@ -91,7 +91,8 @@
   {% set sort_name = country.name %}
 {% endif %}
 <div class="country-card" data-index="{{ loop.index0 }}" data-sort-name="{{ sort_name }}"
-     data-country-name="{{ country.name | lower }}" data-country-code="{{ country.name.split('(')[0].strip() | lower if '(' in country.name else country.name | lower }}">
+     data-prefix="{{ country.prefix }}"
+     data-country-name="{{ country.name | lower }}" data-country-code="{{ country.prefix | lower }}">
 
     <div class="country-header" onclick="toggleCountry(this)">
         <span class="country-chevron">▶</span>

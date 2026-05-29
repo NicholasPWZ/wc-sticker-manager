@@ -117,7 +117,7 @@ function sortAlbum(mode) {
         );
     } else if (mode === 'prefix') {
         cards.sort((a, b) =>
-            a.dataset.countryCode.localeCompare(b.dataset.countryCode, 'en', { sensitivity: 'base' })
+            (a.dataset.prefix || '').localeCompare(b.dataset.prefix || '', 'en', { sensitivity: 'base' })
         );
     } else {
         cards.sort((a, b) => parseInt(a.dataset.index) - parseInt(b.dataset.index));
