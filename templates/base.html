@@ -2,7 +2,10 @@
 <html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{% block title %}Álbum da Copa{% endblock %}</title>
     <script>
         (function() {
@@ -14,9 +17,17 @@
 </head>
 <body>
 
+<!-- Sidebar backdrop (mobile) -->
+<div class="sidebar-backdrop hidden" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
 <div class="app-wrapper">
     <header class="app-header">
-        <div class="header-brand">🏆 Álbum da Copa</div>
+        <div class="header-left">
+            <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="header-brand">🏆 <span class="brand-text">Álbum da Copa</span></div>
+        </div>
 
         <div class="header-actions">
             {% block header_actions %}{% endblock %}
@@ -53,10 +64,13 @@
     </header>
 
     <div class="layout-body">
-        <aside class="sidebar">
-            <p class="sidebar-title">Usuários</p>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <p class="sidebar-title">Usuários</p>
+                <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+            </div>
             {% for u in all_users %}
-            <a href="/album/{{ u.id }}"
+            <a href="/album/{{ u.id }}" onclick="closeSidebar()"
                class="sidebar-user {% if u.id == album_owner.id %}active{% endif %}">
                 <div class="user-avatar">{{ u.display_name[0] | upper }}</div>
                 <div class="user-info">
@@ -76,6 +90,7 @@
 <!-- Trade modal -->
 <div class="modal-overlay hidden" id="trade-modal">
     <div class="modal-box">
+        <div class="modal-handle"></div>
         <button class="modal-close" onclick="closeTradeModal()">✕</button>
         <h3 class="modal-title">Propor Troca</h3>
         <div class="modal-section">
@@ -90,13 +105,14 @@
             <label>Nota (opcional):</label>
             <input type="text" id="modal-note" class="modal-input" placeholder="Ex: pode ser pessoalmente na quarta">
         </div>
-        <button class="btn-primary" onclick="submitTrade()">Enviar Pedido</button>
+        <button class="btn-primary btn-block" onclick="submitTrade()">Enviar Pedido</button>
     </div>
 </div>
 
 <!-- Bulk entry modal -->
 <div class="modal-overlay hidden" id="bulk-modal">
     <div class="modal-box">
+        <div class="modal-handle"></div>
         <button class="modal-close" onclick="closeBulkModal()">✕</button>
         <h3 class="modal-title">Entrada em Massa</h3>
         <p class="modal-hint">Uma linha por país. Código de 3 letras + números separados por espaço.<br>

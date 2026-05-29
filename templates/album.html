@@ -4,9 +4,11 @@
 
 {% block header_actions %}
 {% if is_own_album %}
-<button class="btn-edit" id="edit-btn" onclick="toggleEditMode()">✏️ Editar</button>
-<button class="btn-edit" id="wish-btn" onclick="toggleWishlistMode()">⭐ Desejos</button>
-<button class="btn-edit" onclick="openBulkModal()">📋 Entrada</button>
+<div class="header-edit-group">
+    <button class="btn-edit" id="edit-btn" onclick="toggleEditMode()">✏️ Editar</button>
+    <button class="btn-edit" id="wish-btn" onclick="toggleWishlistMode()">⭐ Desejos</button>
+    <button class="btn-edit" onclick="openBulkModal()">📋 Entrada</button>
+</div>
 {% else %}
 <span class="viewing-label">Álbum de <strong>{{ album_owner.display_name }}</strong></span>
 {% endif %}
@@ -304,6 +306,17 @@
 {% endif %}
 
 {% endblock %}
+
+{% if is_own_album %}
+<div class="mobile-fab" id="mobile-fab">
+    <button class="fab-main" onclick="toggleFab()" id="fab-main-btn">✏️</button>
+    <div class="fab-menu hidden" id="fab-menu">
+        <button class="fab-item" id="fab-edit-btn" onclick="toggleEditMode()">✏️ Editar</button>
+        <button class="fab-item" id="fab-wish-btn" onclick="toggleWishlistMode()">⭐ Desejos</button>
+        <button class="fab-item" onclick="openBulkModal(); toggleFab()">📋 Entrada</button>
+    </div>
+</div>
+{% endif %}
 
 {% block scripts %}
 <script>

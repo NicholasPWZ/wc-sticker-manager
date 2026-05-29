@@ -1,3 +1,42 @@
+// ── Sidebar drawer ────────────────────────────────────────────────────────────
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const isOpen = sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', !isOpen);
+    backdrop.classList.toggle('hidden', isOpen);
+    backdrop.classList.toggle('visible', !isOpen);
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('visible');
+    backdrop.classList.add('hidden');
+}
+
+// ── FAB ────────────────────────────────────────────────────────────────────────
+function toggleFab() {
+    const menu = document.getElementById('fab-menu');
+    const btn = document.getElementById('fab-main-btn');
+    if (!menu) return;
+    const isOpen = !menu.classList.contains('hidden');
+    menu.classList.toggle('hidden', isOpen);
+    btn.classList.toggle('active', !isOpen);
+}
+
+// Close FAB when clicking outside
+document.addEventListener('click', e => {
+    const fab = document.getElementById('mobile-fab');
+    if (fab && !fab.contains(e.target)) {
+        const menu = document.getElementById('fab-menu');
+        const btn = document.getElementById('fab-main-btn');
+        if (menu) menu.classList.add('hidden');
+        if (btn) btn.classList.remove('active');
+    }
+});
+
 // ── Theme ──────────────────────────────────────────────────────────────────────
 function toggleDarkMode() {
     const html = document.documentElement;
@@ -20,8 +59,9 @@ function toggleEditMode() {
     editMode = !editMode;
     if (editMode && wishMode) toggleWishlistMode(); // mutually exclusive
     const btn = document.getElementById('edit-btn');
-    btn.classList.toggle('active', editMode);
-    btn.textContent = editMode ? '🔒 Parar' : '✏️ Editar';
+    if (btn) { btn.classList.toggle('active', editMode); btn.textContent = editMode ? '🔒 Parar' : '✏️ Editar'; }
+    const fabBtn = document.getElementById('fab-edit-btn');
+    if (fabBtn) { fabBtn.classList.toggle('active', editMode); fabBtn.textContent = editMode ? '🔒 Parar Edição' : '✏️ Editar'; }
     document.querySelectorAll('.sticker').forEach(s => {
         s.classList.toggle('editable', editMode);
         s.classList.remove('wish-mode-on');
@@ -32,9 +72,9 @@ function toggleWishlistMode() {
     wishMode = !wishMode;
     if (wishMode && editMode) toggleEditMode();
     const btn = document.getElementById('wish-btn');
-    if (!btn) return;
-    btn.classList.toggle('active', wishMode);
-    btn.textContent = wishMode ? '⭐ Sair' : '⭐ Desejos';
+    if (btn) { btn.classList.toggle('active', wishMode); btn.textContent = wishMode ? '⭐ Sair' : '⭐ Desejos'; }
+    const fabBtn = document.getElementById('fab-wish-btn');
+    if (fabBtn) { fabBtn.classList.toggle('active', wishMode); fabBtn.textContent = wishMode ? '⭐ Sair Desejos' : '⭐ Desejos'; }
     document.querySelectorAll('.sticker').forEach(s => {
         s.classList.remove('editable');
         s.classList.toggle('wish-mode-on', wishMode && !s.classList.contains('checked'));

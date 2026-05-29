@@ -274,11 +274,127 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 [data-theme="dark"] .toast { background: #3a3f4a; }
 @keyframes slideIn { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* ── Mobile adjustments ───────────────────────────────────────────────────── */
-@media (max-width: 600px) {
-    .app-wrapper { grid-template-columns: 0 1fr; }
-    .sidebar { display: none; }
-    .main-content { padding: 12px 14px; }
-    .header-brand { font-size: 15px; }
+/* ── Hamburger button ─────────────────────────────────────────────────────── */
+.hamburger { display: none; flex-direction: column; justify-content: space-between; width: 28px; height: 20px; background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; }
+.hamburger span { display: block; height: 2px; background: white; border-radius: 2px; transition: all 0.2s; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+.brand-text { display: inline; }
+.sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 149; }
+.sidebar-backdrop.visible { display: block; }
+.sidebar-header { display: none; justify-content: space-between; align-items: center; padding: 14px 14px 6px; }
+.sidebar-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); padding: 4px; }
+
+/* ── Mobile FAB ───────────────────────────────────────────────────────────── */
+.mobile-fab { display: none; position: fixed; bottom: 24px; right: 16px; z-index: 120; flex-direction: column; align-items: flex-end; gap: 8px; }
+.fab-main { width: 52px; height: 52px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 22px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.2s; }
+.fab-main:active { transform: scale(0.94); }
+.fab-main.active { background: var(--primary-light); }
+.fab-menu { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.fab-item { background: var(--card-bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 24px; padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.12); white-space: nowrap; }
+.fab-item.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* ── Mobile ───────────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+    /* Layout */
+    .app-wrapper { grid-template-columns: 1fr; grid-template-rows: var(--header-h) 1fr; }
+    .layout-body { display: flex; flex-direction: column; overflow: hidden; height: calc(100dvh - var(--header-h)); }
+    .main-content { padding: 12px 12px 100px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+    /* Header */
+    .hamburger { display: flex; }
+    .header-edit-group { display: none; }
+    .brand-text { font-size: 14px; }
     .user-chip-name { display: none; }
+    .logout-link { display: none; }
+    .icon-btn { font-size: 16px; padding: 3px 5px; }
+    .notif-btn { font-size: 18px; }
+
+    /* Sidebar as drawer */
+    .sidebar {
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        width: 260px;
+        z-index: 150;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+        padding-top: 0;
+        overflow-y: auto;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-header { display: flex; }
+    .sidebar-title { padding: 0; }
+
+    /* FAB */
+    .mobile-fab { display: flex; }
+
+    /* Stickers — larger touch targets */
+    .stickers-grid { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; }
+    .sticker { height: 44px; font-size: 14px; border-radius: 8px; }
+
+    /* Repetidas */
+    .rep-grid { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; }
+    .rep-item { padding: 7px 4px; gap: 5px; }
+    .rep-btn { width: 26px; height: 26px; font-size: 17px; }
+    .rep-qty, .rep-qty-view { font-size: 15px; min-width: 20px; }
+    .btn-trade-sm { padding: 4px 8px; font-size: 12px; }
+
+    /* Cards */
+    .country-card { padding: 10px 12px; margin-bottom: 8px; }
+    .country-name { font-size: 13px; }
+    .country-count { font-size: 11px; }
+    .btn-repetidas { font-size: 11px; padding: 3px 8px; }
+
+    /* Stats chips */
+    .stats-chips { gap: 4px; }
+    .chip { font-size: 11px; padding: 3px 8px; }
+
+    /* Search */
+    .search-bar input { font-size: 16px; } /* prevents iOS zoom on focus */
+
+    /* Sort/view controls */
+    .header-controls { gap: 6px; }
+    .sort-btn { font-size: 11px; padding: 4px 8px; }
+
+    /* Modals — bottom sheet on mobile */
+    .modal-overlay { align-items: flex-end; padding: 0; }
+    .modal-box {
+        border-radius: 20px 20px 0 0;
+        padding: 16px 20px 32px;
+        width: 100%;
+        max-width: 100%;
+        max-height: 88dvh;
+    }
+    .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 4px; margin: 0 auto 16px; }
+    .modal-close { top: 16px; right: 16px; }
+    .modal-input { font-size: 16px; } /* prevents iOS zoom */
+    .bulk-textarea { font-size: 16px; }
+
+    /* Offer list in modal */
+    .offer-list { max-height: 160px; }
+    .offer-item { padding: 8px 10px; font-size: 13px; }
+
+    /* Toast */
+    .toast { bottom: 90px; left: 16px; right: 16px; text-align: center; }
+
+    /* Trade cards */
+    .trade-actions { gap: 10px; }
+    .btn-finalize, .btn-archive { padding: 9px 16px; font-size: 13px; }
+
+    /* Missing view */
+    .missing-row { padding: 8px 10px; }
+    .missing-country { min-width: 130px; font-size: 12px; }
+
+    /* Album header */
+    .album-title-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .header-controls { width: 100%; }
+    .sort-controls, .view-controls { flex: 1; }
+    .sort-btn { flex: 1; justify-content: center; text-align: center; }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+    .stickers-grid { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); }
+    .sticker { height: 40px; }
+    .chip { font-size: 10px; padding: 2px 6px; }
 }
