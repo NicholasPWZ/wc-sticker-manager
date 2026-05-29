@@ -62,11 +62,13 @@ def build_sticker_data(user_id: int, db: Session) -> list:
         trading_nums = trading_map.get(country, {})
         wishlist_nums = wishlist_map.get(country, set())
         prefix = country.split("(")[0].strip() if "(" in country else country
+        start = info.get("start", 1)
         result.append({
             "name": country,
             "code": info["code"],
             "prefix": prefix,
             "count": info["count"],
+            "start": start,
             "owned": owned_nums,
             "trading": trading_nums,
             "wishlist": wishlist_nums,
@@ -159,7 +161,7 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
     missing_by_country = []
     if is_own:
         for c in sticker_data:
-            missing = sorted(n for n in range(1, c["count"] + 1) if n not in c["owned"])
+            missing = sorted(n for n in range(c["start"], c["start"] + c["count"]) if n not in c["owned"])
             if missing:
                 missing_by_country.append({"name": c["name"], "code": c["code"], "missing": missing})
 
@@ -285,7 +287,7 @@ async def bulk_toggle(request: Request, db: Session = Depends(get_db)):
             info = STICKERS.get(country)
             if not info:
                 continue
-            for num in range(1, info["count"] + 1):
+            for num in range(info.get("start", 1), info.get("start", 1) + info["count"]):
                 if num in skip_nums:
                     continue
                 if (country, num) not in existing_keys:

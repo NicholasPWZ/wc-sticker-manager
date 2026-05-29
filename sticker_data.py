@@ -1,5 +1,5 @@
 STICKERS = {
-    "FWC (Especiais  Logos)": {"code": "fwc", "count": 20},
+    "FWC (Especiais  Logos)": {"code": "fwc", "count": 20, "start": 0},
     "MEX (México)": {"code": "mx", "count": 20},
     "RSA (África do Sul)": {"code": "za", "count": 20},
     "KOR (Coreia do Sul)": {"code": "kr", "count": 20},
@@ -63,3 +63,5 @@ for _name in STICKERS:
     else:
         _code = _name
     CODE_TO_COUNTRY[_code.upper()] = _name
+
+CODE_TO_COUNTRY["CC"] = "Coca-Cola"

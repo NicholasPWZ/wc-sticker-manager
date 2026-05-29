@@ -1,4 +1,4 @@
-"""One-time migration: rename the 6 country keys that changed."""
+"""One-time migration: rename country keys + fix FWC sticker numbering."""
 from database import SessionLocal
 
 RENAMES = {
@@ -24,6 +24,16 @@ try:
             )
             if result.rowcount:
                 print(f"  {table}: '{old}' → '{new}' ({result.rowcount} rows)")
+    # Fix FWC sticker 20 → 0
+    fwc = "FWC (Especiais  Logos)"
+    for table in ["album_stickers", "trading_stickers", "wishlist_items"]:
+        r = db.execute(
+            __import__("sqlalchemy").text(f"UPDATE {table} SET number = 0 WHERE country = :c AND number = 20"),
+            {"c": fwc},
+        )
+        if r.rowcount:
+            print(f"  {table}: FWC #20 → #0 ({r.rowcount} rows)")
+
     db.commit()
     print("Done.")
 finally:

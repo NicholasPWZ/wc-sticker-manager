@@ -112,7 +112,7 @@
 
     <!-- Sticker grid -->
     <div class="stickers-grid hidden">
-        {% for num in range(1, country.count + 1) %}
+        {% for num in range(country.start, country.start + country.count) %}
         {% set is_owned = num in country.owned %}
         {% set is_wished = num in country.wishlist %}
         <div class="sticker {% if is_owned %}checked{% elif is_wished %}wished{% endif %}"
@@ -127,7 +127,7 @@
             {% if is_own_album %}+/− para registrar repetidas{% else %}Disponíveis para troca{% endif %}
         </p>
         <div class="rep-grid">
-            {% for num in range(1, country.count + 1) %}
+            {% for num in range(country.start, country.start + country.count) %}
             {% set qty = country.trading.get(num, 0) %}
             {% set i_need_item = (not is_own_album) and ((country.name ~ '|' ~ num) not in my_owned_keys) and qty > 0 %}
             <div class="rep-item {% if qty > 0 %}has-stock{% endif %} {% if i_need_item %}i-need{% endif %}"
