@@ -288,14 +288,13 @@ button, a { touch-action: manipulation; }
 .sidebar-header { display: none; justify-content: space-between; align-items: center; padding: 14px 14px 6px; }
 .sidebar-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); padding: 4px; }
 
-/* ── Mobile FAB ───────────────────────────────────────────────────────────── */
-.mobile-fab { display: none; position: fixed; bottom: 24px; right: 16px; z-index: 120; flex-direction: column; align-items: flex-end; gap: 8px; }
-.fab-main { width: 52px; height: 52px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 22px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.2s; }
-.fab-main:active { transform: scale(0.94); }
-.fab-main.active { background: var(--primary-light); }
-.fab-menu { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-.fab-item { background: var(--card-bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 24px; padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.12); white-space: nowrap; }
-.fab-item.active { background: var(--primary); color: white; border-color: var(--primary); }
+/* ── Sidebar actions ──────────────────────────────────────────────────────── */
+.sidebar-actions { border-top: 1px solid var(--border); margin-top: 12px; padding: 12px 0 8px; }
+.sidebar-actions-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 14px 8px; }
+.sidebar-action-btn { display: flex; align-items: center; width: 100%; padding: 11px 16px; background: none; border: none; font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; text-align: left; transition: background 0.15s; gap: 8px; }
+.sidebar-action-btn:hover { background: var(--bg); }
+.sidebar-action-btn.active { color: var(--primary); background: #eef2ff; }
+[data-theme="dark"] .sidebar-action-btn.active { background: #1a2040; }
 
 /* ── Mobile ───────────────────────────────────────────────────────────────── */
 @media (max-width: 700px) {
@@ -330,9 +329,6 @@ button, a { touch-action: manipulation; }
     .sidebar.open { transform: translateX(0); }
     .sidebar-header { display: flex; }
     .sidebar-title { padding: 0; }
-
-    /* FAB */
-    .mobile-fab { display: flex; }
 
     /* Stickers — larger touch targets */
     .stickers-grid { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; }

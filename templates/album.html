@@ -307,16 +307,17 @@
 
 {% endblock %}
 
+
+{% block sidebar_actions %}
 {% if is_own_album %}
-<div class="mobile-fab" id="mobile-fab">
-    <button class="fab-main" onclick="toggleFab()" id="fab-main-btn">✏️</button>
-    <div class="fab-menu hidden" id="fab-menu">
-        <button class="fab-item" id="fab-edit-btn" onclick="toggleEditMode()">✏️ Editar</button>
-        <button class="fab-item" id="fab-wish-btn" onclick="toggleWishlistMode()">⭐ Desejos</button>
-        <button class="fab-item" onclick="openBulkModal(); toggleFab()">📋 Entrada</button>
-    </div>
+<div class="sidebar-actions">
+    <p class="sidebar-actions-title">Ações</p>
+    <button class="sidebar-action-btn" id="sidebar-edit-btn" onclick="toggleEditMode(); closeSidebar()">✏️ Editar Álbum</button>
+    <button class="sidebar-action-btn" id="sidebar-wish-btn" onclick="toggleWishlistMode(); closeSidebar()">⭐ Lista de Desejos</button>
+    <button class="sidebar-action-btn" onclick="openBulkModal(); closeSidebar()">📋 Entrada em Massa</button>
 </div>
 {% endif %}
+{% endblock %}
 
 {% block scripts %}
 <script>

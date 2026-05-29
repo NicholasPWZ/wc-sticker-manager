@@ -16,27 +16,6 @@ function closeSidebar() {
     backdrop.classList.add('hidden');
 }
 
-// ── FAB ────────────────────────────────────────────────────────────────────────
-function toggleFab() {
-    const menu = document.getElementById('fab-menu');
-    const btn = document.getElementById('fab-main-btn');
-    if (!menu) return;
-    const isOpen = !menu.classList.contains('hidden');
-    menu.classList.toggle('hidden', isOpen);
-    btn.classList.toggle('active', !isOpen);
-}
-
-// Close FAB when clicking outside
-document.addEventListener('click', e => {
-    const fab = document.getElementById('mobile-fab');
-    if (fab && !fab.contains(e.target)) {
-        const menu = document.getElementById('fab-menu');
-        const btn = document.getElementById('fab-main-btn');
-        if (menu) menu.classList.add('hidden');
-        if (btn) btn.classList.remove('active');
-    }
-});
-
 // ── Theme ──────────────────────────────────────────────────────────────────────
 function toggleDarkMode() {
     const html = document.documentElement;
@@ -60,8 +39,8 @@ function toggleEditMode() {
     if (editMode && wishMode) toggleWishlistMode(); // mutually exclusive
     const btn = document.getElementById('edit-btn');
     if (btn) { btn.classList.toggle('active', editMode); btn.textContent = editMode ? '🔒 Parar' : '✏️ Editar'; }
-    const fabBtn = document.getElementById('fab-edit-btn');
-    if (fabBtn) { fabBtn.classList.toggle('active', editMode); fabBtn.textContent = editMode ? '🔒 Parar Edição' : '✏️ Editar'; }
+    const sideBtn = document.getElementById('sidebar-edit-btn');
+    if (sideBtn) { sideBtn.classList.toggle('active', editMode); sideBtn.textContent = editMode ? '🔒 Parar Edição' : '✏️ Editar Álbum'; }
     document.querySelectorAll('.sticker').forEach(s => {
         s.classList.toggle('editable', editMode);
         s.classList.remove('wish-mode-on');
@@ -73,8 +52,8 @@ function toggleWishlistMode() {
     if (wishMode && editMode) toggleEditMode();
     const btn = document.getElementById('wish-btn');
     if (btn) { btn.classList.toggle('active', wishMode); btn.textContent = wishMode ? '⭐ Sair' : '⭐ Desejos'; }
-    const fabBtn = document.getElementById('fab-wish-btn');
-    if (fabBtn) { fabBtn.classList.toggle('active', wishMode); fabBtn.textContent = wishMode ? '⭐ Sair Desejos' : '⭐ Desejos'; }
+    const sideBtn = document.getElementById('sidebar-wish-btn');
+    if (sideBtn) { sideBtn.classList.toggle('active', wishMode); sideBtn.textContent = wishMode ? '⭐ Sair Desejos' : '⭐ Lista de Desejos'; }
     document.querySelectorAll('.sticker').forEach(s => {
         s.classList.remove('editable');
         s.classList.toggle('wish-mode-on', wishMode && !s.classList.contains('checked'));
