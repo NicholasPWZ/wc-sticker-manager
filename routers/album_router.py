@@ -206,8 +206,7 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
         )
 
     ctx = build_page_context(current_user, db)
-    return templates.TemplateResponse("album.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "album.html", {
         **ctx,
         "album_owner": album_owner,
         "sticker_data": sticker_data,

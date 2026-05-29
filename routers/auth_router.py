@@ -15,7 +15,7 @@ templates = Jinja2Templates(directory="templates")
 async def login_page(request: Request, db: Session = Depends(get_db)):
     if get_user_from_request(request, db):
         return RedirectResponse("/", status_code=302)
-    return templates.TemplateResponse("login.html", {"request": request, "error": None})
+    return templates.TemplateResponse(request, "login.html", {"error": None})
 
 
 @router.post("/login", response_class=HTMLResponse)
@@ -27,9 +27,7 @@ async def login_submit(
 ):
     user = db.query(User).filter(User.username == username).first()
     if not user or not verify_password(password, user.password_hash):
-        return templates.TemplateResponse(
-            "login.html", {"request": request, "error": "Usuário ou senha inválidos."}
-        )
+        return templates.TemplateResponse(request, "login.html", {"error": "Usuário ou senha inválidos."})
     response = RedirectResponse("/", status_code=302)
     response.set_cookie("token", create_token(user.id), httponly=True, max_age=60 * 60 * 24 * 30)
     return response
@@ -39,7 +37,7 @@ async def login_submit(
 async def register_page(request: Request, db: Session = Depends(get_db)):
     if get_user_from_request(request, db):
         return RedirectResponse("/", status_code=302)
-    return templates.TemplateResponse("register.html", {"request": request, "error": None})
+    return templates.TemplateResponse(request, "register.html", {"error": None})
 
 
 @router.post("/register", response_class=HTMLResponse)
@@ -53,13 +51,9 @@ async def register_submit(
 ):
     username = username.lower().strip()
     if db.query(User).filter(User.username == username).first():
-        return templates.TemplateResponse(
-            "register.html", {"request": request, "error": "Nome de usuário já existe."}
-        )
+        return templates.TemplateResponse(request, "register.html", {"error": "Nome de usuário já existe."})
     if db.query(User).filter(User.email == email).first():
-        return templates.TemplateResponse(
-            "register.html", {"request": request, "error": "E-mail já cadastrado."}
-        )
+        return templates.TemplateResponse(request, "register.html", {"error": "E-mail já cadastrado."})
     user = User(username=username, display_name=display_name.strip(), email=email, password_hash=hash_password(password))
     db.add(user)
     db.commit()
