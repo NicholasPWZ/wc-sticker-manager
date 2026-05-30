@@ -34,6 +34,14 @@ try:
         if r.rowcount:
             print(f"  {table}: FWC #20 → #0 ({r.rowcount} rows)")
 
+    # Add new columns if they don't exist
+    for col, ddl in [("picture", "TEXT"), ("always_edit_mode", "BOOLEAN DEFAULT 0")]:
+        try:
+            db.execute(__import__("sqlalchemy").text(f"ALTER TABLE users ADD COLUMN {col} {ddl}"))
+            print(f"  users: added column {col}")
+        except Exception:
+            pass  # already exists
+
     db.commit()
     print("Done.")
 finally:

@@ -56,7 +56,13 @@
             </div>
 
             <div class="user-chip">
-                <span class="user-avatar-sm">{{ current_user.display_name[0] | upper }}</span>
+                <a href="/profile" class="user-avatar-sm-link">
+                    {% if current_user.picture %}
+                    <img class="user-avatar-sm-img" src="/static/avatars/{{ current_user.picture }}" alt="">
+                    {% else %}
+                    <span class="user-avatar-sm">{{ current_user.display_name[0] | upper }}</span>
+                    {% endif %}
+                </a>
                 <span class="user-chip-name">{{ current_user.display_name }}</span>
                 <a href="/logout" class="logout-link">Sair</a>
             </div>
@@ -72,7 +78,11 @@
             {% for u in all_users %}
             <a href="/album/{{ u.id }}" onclick="closeSidebar()"
                class="sidebar-user {% if u.id == album_owner.id %}active{% endif %}">
+                {% if u.picture %}
+                <img class="user-avatar user-avatar-img" src="/static/avatars/{{ u.picture }}" alt="">
+                {% else %}
                 <div class="user-avatar">{{ u.display_name[0] | upper }}</div>
+                {% endif %}
                 <div class="user-info">
                     <span class="username">{{ u.display_name }}</span>
                     <span class="completion">{{ u.completion }}%</span>

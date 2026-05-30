@@ -107,6 +107,42 @@ function toggleWishlistItem(el) {
         .catch(() => showToast('Erro ao salvar.'));
 }
 
+// ── Auto-edit mode on load ────────────────────────────────────────────────────
+if (typeof AUTO_EDIT !== 'undefined' && AUTO_EDIT && IS_OWN_ALBUM) {
+    document.addEventListener('DOMContentLoaded', () => toggleEditMode());
+}
+
+// ── Wishlist remove ───────────────────────────────────────────────────────────
+function removeWishlist(country, number, btn) {
+    fetch('/api/wishlist/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ country, number }),
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.wished) {
+                const chip = btn.closest('.wish-chip');
+                const row = chip?.closest('.wishlist-row');
+                chip?.remove();
+                // Remove row if no more chips
+                if (row && !row.querySelector('.wish-chip')) row.remove();
+                showToast('Removido da lista de desejos.');
+            }
+        })
+        .catch(() => showToast('Erro ao remover.'));
+}
+
+// ── Ver mais toggle ───────────────────────────────────────────────────────────
+function toggleVerMais(id, btn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isHidden = el.style.display === 'none';
+    el.style.display = isHidden ? 'inline' : 'none';
+    btn.textContent = isHidden ? 'Ver menos' : btn.dataset.originalText || btn.textContent;
+    if (isHidden && !btn.dataset.originalText) btn.dataset.originalText = btn.textContent;
+}
+
 // ── Sort & filter ──────────────────────────────────────────────────────────────
 function sortAlbum(mode) {
     const list = document.getElementById('album-list');

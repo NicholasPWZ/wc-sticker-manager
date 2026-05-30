@@ -114,8 +114,7 @@
     <div class="stickers-grid hidden">
         {% for num in range(country.start, country.start + country.count) %}
         {% set is_owned = num in country.owned %}
-        {% set is_wished = num in country.wishlist %}
-        <div class="sticker {% if is_owned %}checked{% elif is_wished %}wished{% endif %}"
+        <div class="sticker {% if is_owned %}checked{% endif %}"
              data-country="{{ country.name }}" data-number="{{ num }}"
              onclick="handleStickerClick(this)">{{ num }}</div>
         {% endfor %}
@@ -158,6 +157,75 @@
 {% endfor %}
 </div>
 
+<!-- ── Can offer section (when visiting others) ── -->
+{% if not is_own_album and can_offer %}
+<section class="can-offer-section">
+    <button class="section-toggle-btn can-offer-btn" onclick="toggleSection('can-offer-body', this)">
+        🎁 O que você pode oferecer para {{ album_owner.display_name }}
+        <span class="match-count">({{ can_offer | length }} figurinha{{ 's' if can_offer | length > 1 else '' }})</span> ▶
+    </button>
+    <div class="hidden" id="can-offer-body">
+        <div class="can-offer-grid" id="can-offer-chips">
+            {% for item in can_offer[:8] %}
+            <span class="trade-chip can-offer-chip">
+                {{ item.country.split('(')[0].strip() if '(' in item.country else item.country }}
+                #{{ item.number }}
+                <span class="qty-badge">×{{ item.quantity }}</span>
+            </span>
+            {% endfor %}
+            {% if can_offer | length > 8 %}
+            <span class="match-stickers-hidden" id="can-offer-more" style="display:none">
+                {% for item in can_offer[8:] %}
+                <span class="trade-chip can-offer-chip">
+                    {{ item.country.split('(')[0].strip() if '(' in item.country else item.country }}
+                    #{{ item.number }}
+                    <span class="qty-badge">×{{ item.quantity }}</span>
+                </span>
+                {% endfor %}
+            </span>
+            <button class="btn-ver-mais" onclick="toggleVerMais('can-offer-more', this)">
+                Ver todos ({{ can_offer | length }})
+            </button>
+            {% endif %}
+        </div>
+        <button class="btn-primary" style="margin-top:12px;font-size:13px;padding:8px 18px"
+                onclick="openTradeModal({{ album_owner.id }}, '{{ can_offer[0].country }}', {{ can_offer[0].number }}, {{ can_offer[0].quantity }})">
+            🔄 Propor Troca
+        </button>
+    </div>
+</section>
+{% endif %}
+
+<!-- ── Wishlist section ── -->
+{% if wishlist_section %}
+<section class="wishlist-section-block">
+    <button class="section-toggle-btn" onclick="toggleSection('wishlist-body', this)">
+        ⭐ {% if is_own_album %}Minha Lista de Desejos{% else %}Lista de Desejos de {{ album_owner.display_name }}{% endif %}
+        <span class="match-count">({{ wishlist_section | sum(attribute='numbers') | list | length }} figurinhas)</span> ▶
+    </button>
+    <div class="wishlist-body hidden" id="wishlist-body">
+        {% for entry in wishlist_section %}
+        <div class="wishlist-row">
+            <span class="wishlist-country">
+                {% if entry.code == 'fwc' %}🏆{% elif entry.code == 'coca' %}🥤
+                {% else %}<img class="flag-img-sm" src="https://flagcdn.com/w20/{{ entry.code }}.png" alt="">{% endif %}
+                <strong>{{ entry.prefix }}</strong> {{ entry.name.split('(')[1].rstrip(')') if '(' in entry.name else '' }}
+            </span>
+            <span class="wishlist-nums">
+                {% for num in entry.numbers %}
+                <span class="wish-chip">{{ num }}
+                    {% if is_own_album %}
+                    <button class="wish-remove" onclick="removeWishlist('{{ entry.name }}', {{ num }}, this)" title="Remover">✕</button>
+                    {% endif %}
+                </span>
+                {% endfor %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
 <!-- ── Match finder (own album only) ── -->
 {% if is_own_album and matches %}
 <section class="matches-section">
@@ -168,38 +236,56 @@
         {% for m in matches %}
         <div class="match-card {% if m.mutual %}match-mutual{% endif %}">
             <div class="match-header">
+                {% if m.picture %}
+                <img class="user-avatar-sm-inline-img" src="/static/avatars/{{ m.picture }}" alt="">
+                {% else %}
                 <div class="user-avatar-sm-inline">{{ m.display_name[0] | upper }}</div>
+                {% endif %}
                 <strong>{{ m.display_name }}</strong>
                 {% if m.mutual %}<span class="mutual-badge">🔄 Match mútuo!</span>{% endif %}
             </div>
-            {% if m.they_give %}
             <div class="match-row">
-                <span class="match-label">Pode te dar ({{ m.they_give_total }}):</span>
-                <span class="match-stickers">
-                    {% for c, n in m.they_give %}
+                <span class="match-label">Tem para você ({{ m.they_give_total }}):</span>
+                <span class="match-stickers" id="match-give-{{ loop.index }}">
+                    {% for c, n in m.they_give[:6] %}
                     <span class="trade-chip">{{ c.split('(')[0].strip() if '(' in c else c }} #{{ n }}</span>
                     {% endfor %}
-                    {% if m.they_give_total > m.they_give | length %}<span class="trade-chip muted">+{{ m.they_give_total - (m.they_give | length) }}</span>{% endif %}
+                    {% if m.they_give_total > 6 %}
+                    <span class="match-stickers-hidden" id="match-give-more-{{ loop.index }}" style="display:none">
+                        {% for c, n in m.they_give[6:] %}
+                        <span class="trade-chip">{{ c.split('(')[0].strip() if '(' in c else c }} #{{ n }}</span>
+                        {% endfor %}
+                    </span>
+                    <button class="btn-ver-mais" onclick="toggleVerMais('match-give-more-{{ loop.index }}', this)">
+                        Ver todos ({{ m.they_give_total }})
+                    </button>
+                    {% endif %}
                 </span>
             </div>
-            {% endif %}
             {% if m.i_give %}
             <div class="match-row">
-                <span class="match-label">Você pode dar ({{ m.i_give_total }}):</span>
+                <span class="match-label">Você tem para ele ({{ m.i_give_total }}):</span>
                 <span class="match-stickers">
-                    {% for c, n in m.i_give %}
+                    {% for c, n in m.i_give[:6] %}
                     <span class="trade-chip muted">{{ c.split('(')[0].strip() if '(' in c else c }} #{{ n }}</span>
                     {% endfor %}
-                    {% if m.i_give_total > m.i_give | length %}<span class="trade-chip muted">+{{ m.i_give_total - (m.i_give | length) }}</span>{% endif %}
+                    {% if m.i_give_total > 6 %}
+                    <span class="match-stickers-hidden" id="match-i-more-{{ loop.index }}" style="display:none">
+                        {% for c, n in m.i_give[6:] %}
+                        <span class="trade-chip muted">{{ c.split('(')[0].strip() if '(' in c else c }} #{{ n }}</span>
+                        {% endfor %}
+                    </span>
+                    <button class="btn-ver-mais" onclick="toggleVerMais('match-i-more-{{ loop.index }}', this)">
+                        Ver todos ({{ m.i_give_total }})
+                    </button>
+                    {% endif %}
                 </span>
             </div>
             {% endif %}
-            {% if m.they_give %}
             <button class="btn-trade-sm match-trade-btn"
                     onclick="openTradeModal({{ m.user_id }}, '{{ m.they_give[0][0] }}', {{ m.they_give[0][1] }}, 1)">
                 🔄 Propor Troca
             </button>
-            {% endif %}
         </div>
         {% endfor %}
     </div>
@@ -324,6 +410,7 @@
 {% block scripts %}
 <script>
     const IS_OWN_ALBUM = {{ 'true' if is_own_album else 'false' }};
+    const AUTO_EDIT = {{ 'true' if auto_edit else 'false' }};
     const MY_TRADING = {{ my_trading | tojson }};
     const OWNER_MISSING_KEYS = new Set({{ owner_missing_keys | tojson }});
     const COUNTRY_CODES = {{ code_to_country | tojson }};

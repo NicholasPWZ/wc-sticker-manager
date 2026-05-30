@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Meu Perfil{% endblock %}
+
+{% block header_actions %}
+<a href="/album/{{ current_user.id }}" class="btn-edit">← Meu Álbum</a>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <h2 class="section-title">Meu Perfil</h2>
+
+    <!-- Avatar -->
+    <div class="profile-avatar-section">
+        <div class="profile-avatar-wrap">
+            {% if current_user.picture %}
+            <img class="profile-avatar-img" id="avatar-preview" src="/static/avatars/{{ current_user.picture }}" alt="">
+            {% else %}
+            <div class="profile-avatar-letter" id="avatar-letter">{{ current_user.display_name[0] | upper }}</div>
+            <img class="profile-avatar-img hidden" id="avatar-preview" src="" alt="">
+            {% endif %}
+        </div>
+        <label class="btn-secondary upload-label">
+            📷 Alterar foto
+            <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+        </label>
+    </div>
+
+    {% if error %}
+    <div class="auth-error" style="max-width:480px;margin-bottom:12px">{{ error }}</div>
+    {% endif %}
+    {% if success %}
+    <div class="profile-success">✔ {{ success }}</div>
+    {% endif %}
+
+    <!-- Profile form -->
+    <form method="post" action="/profile/update" class="profile-form">
+        <div class="form-group">
+            <label>Nome (visível para todos)</label>
+            <input type="text" name="display_name" value="{{ current_user.display_name }}" required maxlength="40">
+        </div>
+        <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" name="email" value="{{ current_user.email }}" required>
+        </div>
+        <div class="form-group">
+            <label>Usuário (login)</label>
+            <input type="text" value="{{ current_user.username }}" disabled class="input-disabled">
+            <small>O usuário não pode ser alterado.</small>
+        </div>
+
+        <div class="form-divider">Alterar senha <span>(deixe em branco para manter)</span></div>
+        <div class="form-group">
+            <label>Senha atual</label>
+            <input type="password" name="current_password" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+            <label>Nova senha</label>
+            <input type="password" name="new_password" placeholder="••••••••" minlength="6">
+        </div>
+
+        <div class="form-divider">Preferências</div>
+        <label class="toggle-row">
+            <div class="toggle-info">
+                <span class="toggle-title">Sempre em modo de edição</span>
+                <small class="toggle-desc">Seu álbum abre em modo de edição automaticamente.</small>
+            </div>
+            <div class="toggle-switch">
+                <input type="checkbox" name="always_edit_mode" id="always-edit-toggle"
+                       {% if current_user.always_edit_mode %}checked{% endif %} onchange="this.value = this.checked ? 'on' : 'off'">
+                <span class="toggle-slider"></span>
+            </div>
+        </label>
+
+        <button type="submit" class="btn-primary" style="margin-top:20px;width:100%">Salvar Alterações</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function uploadAvatar(input) {
+    if (!input.files.length) return;
+    const form = new FormData();
+    form.append('file', input.files[0]);
+    fetch('/profile/picture', { method: 'POST', body: form })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) { showToast(data.error); return; }
+            const preview = document.getElementById('avatar-preview');
+            const letter = document.getElementById('avatar-letter');
+            preview.src = data.url + '?t=' + Date.now();
+            preview.classList.remove('hidden');
+            if (letter) letter.classList.add('hidden');
+            showToast('Foto atualizada!');
+        })
+        .catch(() => showToast('Erro ao enviar foto.'));
+}
+</script>
+{% endblock %}

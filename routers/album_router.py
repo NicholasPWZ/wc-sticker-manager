@@ -117,13 +117,14 @@ def compute_matches(current_user_id: int, db: Session) -> list:
         they_give = sorted(their_trading & my_missing)
         i_give = sorted(my_trading & their_missing)
 
-        if they_give or i_give:
+        if they_give:   # only show when they have something I need
             matches.append({
                 "user_id": user.id,
                 "display_name": user.display_name,
-                "they_give": they_give[:20],      # cap display list
+                "picture": user.picture,
+                "they_give": they_give,
                 "they_give_total": len(they_give),
-                "i_give": i_give[:20],
+                "i_give": i_give,
                 "i_give_total": len(i_give),
                 "mutual": bool(they_give and i_give),
             })
@@ -185,7 +186,14 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
             (s.country, s.number)
             for s in db.query(AlbumSticker).filter(AlbumSticker.user_id == user_id).all()
         )
-        owner_missing_keys = [f"{c}|{n}" for c, n in (_ALL_KEYS - owner_owned)]
+        owner_missing = _ALL_KEYS - owner_owned
+        owner_missing_keys = [f"{c}|{n}" for c, n in owner_missing]
+
+        # What the current user can offer: their trading stickers the owner is missing
+        can_offer = [
+            item for item in my_trading
+            if (item["country"], item["number"]) in owner_missing
+        ]
 
     # Trades (own album only)
     incoming_trades = outgoing_trades = past_trades = []
@@ -209,6 +217,12 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
             .order_by(Trade.created_at.desc()).limit(50).all()
         )
 
+    # Wishlist section (grouped by country, for display)
+    wishlist_section = []
+    for c in sticker_data:
+        if c["wishlist"]:
+            wishlist_section.append({"name": c["name"], "code": c["code"], "prefix": c["prefix"], "numbers": sorted(c["wishlist"])})
+
     ctx = build_page_context(current_user, db)
     return templates.TemplateResponse(request, "album.html", {
         **ctx,
@@ -231,6 +245,9 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
         "my_owned_keys": my_owned_keys,
         "owner_missing_keys": owner_missing_keys,
         "code_to_country": CODE_TO_COUNTRY,
+        "wishlist_section": wishlist_section,
+        "auto_edit": is_own and current_user.always_edit_mode,
+        "can_offer": can_offer if not is_own else [],
     })
 
 

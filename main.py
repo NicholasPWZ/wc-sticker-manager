@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from database import Base, engine
-from routers import album_router, auth_router, trades_router
+from routers import album_router, auth_router, profile_router, trades_router
 
 
 class ConnectionManager:
@@ -44,6 +44,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(auth_router.router)
 app.include_router(album_router.router)
 app.include_router(trades_router.router)
+app.include_router(profile_router.router)
 
 
 @app.websocket("/ws/{user_id}")

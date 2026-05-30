@@ -8,10 +8,12 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, nullable=False)   # login handle, lowercase
-    display_name = Column(String, nullable=False)            # shown to other users
+    username = Column(String, unique=True, nullable=False)
+    display_name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
+    picture = Column(String, nullable=True)
+    always_edit_mode = Column(Boolean, default=False, nullable=False)
 
     album_stickers = relationship("AlbumSticker", back_populates="user", cascade="all, delete-orphan")
     trading_stickers = relationship("TradingSticker", back_populates="user", cascade="all, delete-orphan")
