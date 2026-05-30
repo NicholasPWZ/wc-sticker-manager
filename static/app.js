@@ -1,3 +1,16 @@
+// ── Announcement banner ───────────────────────────────────────────────────────
+const ANNOUNCE_KEY = 'announce_v2_dismissed';
+(function initAnnouncement() {
+    if (localStorage.getItem(ANNOUNCE_KEY)) {
+        document.getElementById('announce-banner')?.classList.add('hidden');
+    }
+})();
+
+function dismissAnnouncement() {
+    localStorage.setItem(ANNOUNCE_KEY, '1');
+    document.getElementById('announce-banner')?.classList.add('hidden');
+}
+
 // ── Sidebar drawer ────────────────────────────────────────────────────────────
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
@@ -102,6 +115,11 @@ function toggleWishlistItem(el) {
         .then(data => {
             el.classList.toggle('wished', data.wished);
             el.classList.toggle('wish-mode-on', !data.wished);
+            if (data.wished) {
+                addToWishlistSection(country, number, el);
+            } else {
+                removeFromWishlistSection(country, number);
+            }
             showToast(data.wished ? '⭐ Adicionado à lista de desejos!' : 'Removido da lista de desejos.');
         })
         .catch(() => showToast('Erro ao salvar.'));
@@ -112,7 +130,7 @@ if (typeof AUTO_EDIT !== 'undefined' && AUTO_EDIT && IS_OWN_ALBUM) {
     document.addEventListener('DOMContentLoaded', () => toggleEditMode());
 }
 
-// ── Wishlist remove ───────────────────────────────────────────────────────────
+// ── Wishlist remove (called from section ✕ button) ───────────────────────────
 function removeWishlist(country, number, btn) {
     fetch('/api/wishlist/toggle', {
         method: 'POST',
@@ -122,15 +140,71 @@ function removeWishlist(country, number, btn) {
         .then(r => r.json())
         .then(data => {
             if (!data.wished) {
-                const chip = btn.closest('.wish-chip');
-                const row = chip?.closest('.wishlist-row');
-                chip?.remove();
-                // Remove row if no more chips
-                if (row && !row.querySelector('.wish-chip')) row.remove();
+                removeFromWishlistSection(country, number);
+                // Also unmark the sticker button
+                const sel = `.sticker[data-country="${CSS.escape(country)}"][data-number="${number}"]`;
+                document.querySelectorAll(sel).forEach(s => s.classList.remove('wished'));
                 showToast('Removido da lista de desejos.');
             }
         })
         .catch(() => showToast('Erro ao remover.'));
+}
+
+// ── Wishlist section DOM helpers ──────────────────────────────────────────────
+function addToWishlistSection(country, number, stickerEl) {
+    const body = document.getElementById('wishlist-body');
+    if (!body) return;
+
+    let row = body.querySelector(`[data-wishlist-country="${CSS.escape(country)}"]`);
+    if (!row) {
+        const card = stickerEl?.closest('.country-card');
+        const code = card?.dataset.countryCode || '';
+        const prefix = card?.dataset.prefix || country.split('(')[0].trim();
+        const displayName = country.includes('(') ? country.split('(')[1].replace(')', '').trim() : '';
+        let flagHtml = code === 'fwc' ? '🏆' : code === 'coca' ? '🥤'
+            : `<img class="flag-img-sm" src="https://flagcdn.com/w20/${code}.png" alt="">`;
+
+        row = document.createElement('div');
+        row.className = 'wishlist-row';
+        row.dataset.wishlistCountry = country;
+        row.innerHTML = `<span class="wishlist-country">${flagHtml} <strong>${prefix}</strong> ${displayName}</span><span class="wishlist-nums"></span>`;
+        body.appendChild(row);
+    }
+
+    const nums = row.querySelector('.wishlist-nums');
+    if (nums.querySelector(`[data-number="${number}"]`)) return; // already there
+
+    const chip = document.createElement('span');
+    chip.className = 'wish-chip';
+    chip.dataset.number = number;
+    chip.innerHTML = `${number} <button class="wish-remove" onclick="removeWishlist('${country.replace(/'/g, "\\'")}',${number},this)" title="Remover">✕</button>`;
+
+    const existing = [...nums.querySelectorAll('.wish-chip')];
+    const before = existing.find(c => parseInt(c.dataset.number) > number);
+    before ? nums.insertBefore(chip, before) : nums.appendChild(chip);
+
+    updateWishlistCount();
+}
+
+function removeFromWishlistSection(country, number) {
+    const body = document.getElementById('wishlist-body');
+    if (!body) return;
+    const row = body.querySelector(`[data-wishlist-country="${CSS.escape(country)}"]`);
+    if (!row) return;
+    row.querySelector(`[data-number="${number}"]`)?.remove();
+    if (!row.querySelector('.wish-chip')) row.remove();
+    updateWishlistCount();
+}
+
+function updateWishlistCount() {
+    const body = document.getElementById('wishlist-body');
+    if (!body) return;
+    const total = body.querySelectorAll('.wish-chip').length;
+    const section = body.closest('.wishlist-section-block');
+    if (!section) return;
+    const countEl = section.querySelector('.match-count');
+    if (countEl) countEl.textContent = `(${total} figurinha${total !== 1 ? 's' : ''})`;
+    section.style.display = total > 0 ? '' : 'none';
 }
 
 // ── Ver mais toggle ───────────────────────────────────────────────────────────

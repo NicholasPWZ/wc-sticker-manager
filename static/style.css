@@ -33,6 +33,19 @@
     --red: #ff6b84;
 }
 
+/* Dark mode: override primary-colored text to white */
+[data-theme="dark"] .country-name,
+[data-theme="dark"] .album-title-row h2,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .wishlist-country,
+[data-theme="dark"] .missing-country,
+[data-theme="dark"] .wishlist-section-block .section-toggle-btn,
+[data-theme="dark"] .matches-section .section-toggle-btn,
+[data-theme="dark"] .can-offer-section .section-toggle-btn,
+[data-theme="dark"] .auth-title,
+[data-theme="dark"] .profile-page .section-title,
+[data-theme="dark"] .trades-section .section-title { color: var(--text); }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { max-width: 100%; overflow-x: hidden; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); transition: background 0.2s, color 0.2s; max-width: 100%; overflow-x: hidden; }
@@ -165,6 +178,9 @@ button, a { touch-action: manipulation; }
 .sticker.wished { background: #fff8e1; border-color: #fbc02d; color: #f9a825; }
 .sticker.wished::after { content: '⭐'; position: absolute; top: -5px; right: -5px; font-size: 9px; }
 [data-theme="dark"] .sticker.wished { background: #2a200a; border-color: #f9a825; color: #f9a825; }
+.sticker.wished { background: #fff8e1; border-color: #fbc02d; color: #b8860b; }
+.sticker.wished::after { content: '⭐'; position: absolute; top: -5px; right: -4px; font-size: 8px; line-height: 1; }
+[data-theme="dark"] .sticker.wished { background: #2a200a; border-color: #f9a825; color: #F5C518; }
 .sticker.editable { cursor: pointer; }
 .sticker.editable:hover:not(.checked):not(.wished) { background: #e8f5e9; border-color: var(--accent); color: var(--accent-dark); }
 .sticker.wish-mode-on { cursor: pointer; }
@@ -286,6 +302,15 @@ button, a { touch-action: manipulation; }
 .toast { position: fixed; bottom: 24px; right: 24px; background: #323232; color: white; padding: 11px 18px; border-radius: 8px; font-size: 13px; z-index: 600; box-shadow: 0 4px 14px rgba(0,0,0,0.3); animation: slideIn 0.25s ease; max-width: calc(100vw - 48px); }
 [data-theme="dark"] .toast { background: #3a3f4a; }
 @keyframes slideIn { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ── Announcement banner ──────────────────────────────────────────────────── */
+.announce-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: linear-gradient(90deg, #0d6b3a, #0B2265); color: white; padding: 10px 18px; font-size: 13px; line-height: 1.5; }
+.announce-banner.hidden { display: none; }
+.announce-text a.announce-link { color: #7df7b0; font-weight: 700; text-decoration: underline; }
+.announce-close { background: rgba(255,255,255,0.15); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 13px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.announce-close:hover { background: rgba(255,255,255,0.3); }
+[data-theme="dark"] .announce-banner { background: linear-gradient(90deg, #0d3a22, #0a1a38); }
+@media (max-width: 700px) { .announce-banner { font-size: 12px; padding: 8px 12px; } }
 
 /* ── Hamburger button ─────────────────────────────────────────────────────── */
 .hamburger { display: none; flex-direction: column; justify-content: space-between; width: 28px; height: 20px; background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; }

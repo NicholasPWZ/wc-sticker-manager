@@ -114,7 +114,8 @@
     <div class="stickers-grid hidden">
         {% for num in range(country.start, country.start + country.count) %}
         {% set is_owned = num in country.owned %}
-        <div class="sticker {% if is_owned %}checked{% endif %}"
+        {% set is_wished = num in country.wishlist %}
+        <div class="sticker {% if is_owned %}checked{% elif is_wished %}wished{% endif %}"
              data-country="{{ country.name }}" data-number="{{ num }}"
              onclick="handleStickerClick(this)">{{ num }}</div>
         {% endfor %}
@@ -205,7 +206,7 @@
     </button>
     <div class="wishlist-body hidden" id="wishlist-body">
         {% for entry in wishlist_section %}
-        <div class="wishlist-row">
+        <div class="wishlist-row" data-wishlist-country="{{ entry.name }}">
             <span class="wishlist-country">
                 {% if entry.code == 'fwc' %}🏆{% elif entry.code == 'coca' %}🥤
                 {% else %}<img class="flag-img-sm" src="https://flagcdn.com/w20/{{ entry.code }}.png" alt="">{% endif %}
@@ -213,7 +214,7 @@
             </span>
             <span class="wishlist-nums">
                 {% for num in entry.numbers %}
-                <span class="wish-chip">{{ num }}
+                <span class="wish-chip" data-number="{{ num }}">{{ num }}
                     {% if is_own_album %}
                     <button class="wish-remove" onclick="removeWishlist('{{ entry.name }}', {{ num }}, this)" title="Remover">✕</button>
                     {% endif %}
