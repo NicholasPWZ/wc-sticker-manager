@@ -303,14 +303,10 @@ button, a { touch-action: manipulation; }
 [data-theme="dark"] .toast { background: #3a3f4a; }
 @keyframes slideIn { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* ── Announcement banner ──────────────────────────────────────────────────── */
-.announce-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: linear-gradient(90deg, #0d6b3a, #0B2265); color: white; padding: 10px 18px; font-size: 13px; line-height: 1.5; }
-.announce-banner.hidden { display: none; }
-.announce-text a.announce-link { color: #7df7b0; font-weight: 700; text-decoration: underline; }
-.announce-close { background: rgba(255,255,255,0.15); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 13px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.announce-close:hover { background: rgba(255,255,255,0.3); }
-[data-theme="dark"] .announce-banner { background: linear-gradient(90deg, #0d3a22, #0a1a38); }
-@media (max-width: 700px) { .announce-banner { font-size: 12px; padding: 8px 12px; } }
+/* ── Announcement notification item ──────────────────────────────────────── */
+.notif-announce { font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+.notif-announce a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.notif-announce .notif-dismiss { float: right; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; margin-left: 6px; }
 
 /* ── Hamburger button ─────────────────────────────────────────────────────── */
 .hamburger { display: none; flex-direction: column; justify-content: space-between; width: 28px; height: 20px; background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; }

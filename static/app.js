@@ -1,14 +1,34 @@
-// ── Announcement banner ───────────────────────────────────────────────────────
+// ── Announcement notification ─────────────────────────────────────────────────
 const ANNOUNCE_KEY = 'announce_v2_dismissed';
 (function initAnnouncement() {
-    if (localStorage.getItem(ANNOUNCE_KEY)) {
-        document.getElementById('announce-banner')?.classList.add('hidden');
-    }
+    if (localStorage.getItem(ANNOUNCE_KEY)) return;
+    const list = document.getElementById('notif-list');
+    if (!list) return;
+    list.querySelector('.notif-empty')?.remove();
+    const el = document.createElement('div');
+    el.className = 'notif-announce';
+    el.id = 'notif-announce-item';
+    el.innerHTML = `
+        <button class="notif-dismiss" onclick="dismissAnnouncement()">✕</button>
+        🆕 <strong>Novidades:</strong><br>
+        · Edite seu <a href="/profile">perfil</a> (nome, foto, senha)<br>
+        · <strong>Matches de Troca</strong> agora mostram só quem tem o que você precisa
+    `;
+    list.prepend(el);
+    const badge = document.getElementById('notif-badge');
+    if (badge) { badge.classList.remove('hidden'); badge.textContent = parseInt(badge.textContent || '0') + 1; }
 })();
 
 function dismissAnnouncement() {
     localStorage.setItem(ANNOUNCE_KEY, '1');
-    document.getElementById('announce-banner')?.classList.add('hidden');
+    const el = document.getElementById('notif-announce-item');
+    if (el) { el.remove(); }
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+        const n = Math.max(0, parseInt(badge.textContent || '1') - 1);
+        badge.textContent = n;
+        if (n === 0) badge.classList.add('hidden');
+    }
 }
 
 // ── Sidebar drawer ────────────────────────────────────────────────────────────
