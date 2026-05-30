@@ -201,7 +201,7 @@
 <section class="wishlist-section-block">
     <button class="section-toggle-btn" onclick="toggleSection('wishlist-body', this)">
         ⭐ {% if is_own_album %}Minha Lista de Desejos{% else %}Lista de Desejos de {{ album_owner.display_name }}{% endif %}
-        <span class="match-count">({{ wishlist_section | sum(attribute='numbers') | list | length }} figurinhas)</span> ▶
+        <span class="match-count">({{ wishlist_total }} figurinha{{ 's' if wishlist_total != 1 else '' }})</span> ▶
     </button>
     <div class="wishlist-body hidden" id="wishlist-body">
         {% for entry in wishlist_section %}

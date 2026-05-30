@@ -222,6 +222,7 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
     for c in sticker_data:
         if c["wishlist"]:
             wishlist_section.append({"name": c["name"], "code": c["code"], "prefix": c["prefix"], "numbers": sorted(c["wishlist"])})
+    wishlist_total = sum(len(e["numbers"]) for e in wishlist_section)
 
     ctx = build_page_context(current_user, db)
     return templates.TemplateResponse(request, "album.html", {
@@ -246,6 +247,7 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
         "owner_missing_keys": owner_missing_keys,
         "code_to_country": CODE_TO_COUNTRY,
         "wishlist_section": wishlist_section,
+        "wishlist_total": wishlist_total,
         "auto_edit": is_own and current_user.always_edit_mode,
         "can_offer": can_offer if not is_own else [],
     })
