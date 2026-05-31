@@ -68,7 +68,7 @@ button, a { touch-action: manipulation; }
 /* ── App shell ────────────────────────────────────────────────────────────── */
 .app-wrapper { display: grid; grid-template-rows: var(--header-h) 1fr; grid-template-columns: var(--sidebar-w) 1fr; height: 100vh; }
 
-.app-header { grid-column: 1/-1; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, #0B2265 0%, #1a3a8f 50%, #0B2265 100%); color: white; padding: 0 14px; height: var(--header-h); box-shadow: 0 2px 12px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; gap: 8px; overflow: hidden; }
+.app-header { grid-column: 1/-1; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, #0B2265 0%, #1a3a8f 50%, #0B2265 100%); color: white; padding: 0 14px; height: var(--header-h); box-shadow: 0 2px 12px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; gap: 8px; }
 .header-brand { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; white-space: nowrap; }
 .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; overflow: hidden; }
 
@@ -102,7 +102,7 @@ button, a { touch-action: manipulation; }
 .notif-wrapper { position: relative; }
 .notif-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; position: relative; padding: 4px 6px; }
 .badge { position: absolute; top: -1px; right: -3px; background: #f44336; color: white; border-radius: 10px; font-size: 10px; font-weight: 700; padding: 1px 5px; min-width: 16px; text-align: center; }
-.notif-panel { position: absolute; right: 0; top: 38px; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,0.15); width: 270px; z-index: 200; padding: 14px; }
+.notif-panel { position: fixed; right: 12px; top: calc(var(--header-h) + 6px); background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,0.15); width: 280px; z-index: 300; padding: 14px; max-height: 60vh; overflow-y: auto; }
 .notif-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
 .notif-empty { font-size: 13px; color: var(--text-muted); }
 .notif-item { font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--border); }
@@ -164,6 +164,7 @@ button, a { touch-action: manipulation; }
 .country-chevron { font-size: 9px; color: var(--text-muted); flex-shrink: 0; }
 .country-name { font-weight: 700; font-size: 14px; color: var(--primary); display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
 .flag-img { width: 20px; height: auto; border-radius: 2px; flex-shrink: 0; }
+.country-page { font-size: 10px; font-weight: 600; color: var(--text-muted); background: var(--bg); border-radius: 4px; padding: 1px 5px; margin-left: 2px; white-space: nowrap; }
 .flag-emoji { font-size: 18px; }
 .country-meta { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
 .country-count { font-size: 11px; background: var(--bg); padding: 2px 7px; border-radius: 10px; font-weight: 700; color: var(--text-muted); }

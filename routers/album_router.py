@@ -69,6 +69,7 @@ def build_sticker_data(user_id: int, db: Session) -> list:
             "prefix": prefix,
             "count": info["count"],
             "start": start,
+            "page": info.get("page"),
             "owned": owned_nums,
             "trading": trading_nums,
             "wishlist": wishlist_nums,

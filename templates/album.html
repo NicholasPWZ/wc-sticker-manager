@@ -101,6 +101,7 @@
             {% elif country.code == 'coca' %}<span class="flag-emoji">🥤</span>
             {% else %}<img class="flag-img" src="https://flagcdn.com/w40/{{ country.code }}.png" alt="">{% endif %}
             {{ country.name }}
+            {% if country.page %}<span class="country-page">Pág. {{ country.page }}</span>{% endif %}
         </span>
         <div class="country-meta">
             <span class="country-count" id="cnt-{{ loop.index }}">{{ country.owned_count }}/{{ country.count }}</span>
