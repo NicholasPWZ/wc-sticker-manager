@@ -29,6 +29,7 @@
             <div class="view-controls">
                 <button class="sort-btn active" data-view="cards" onclick="setView('cards')">🗂 Cards</button>
                 <button class="sort-btn" data-view="missing" onclick="setView('missing')">🔍 Faltantes</button>
+                <button class="sort-btn" data-view="trading" onclick="setView('trading')">🔄 Repetidas</button>
             </div>
             {% endif %}
         </div>
@@ -78,6 +79,54 @@
     </div>
     {% else %}
     <p class="trades-empty">🎉 Álbum completo!</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- ── Repetidas list view (own album only) ── -->
+{% if is_own_album %}
+<div class="rep-list-view hidden" id="rep-list-view">
+    {% set sorted_data = sticker_data | sort(attribute='prefix') %}
+    {% set has_any = namespace(v=false) %}
+    {% for country in sorted_data %}{% if country.trading %}{% set has_any.v = true %}{% endif %}{% endfor %}
+    {% if has_any.v %}
+    <div class="rep-list-topbar">
+        <p class="rep-list-header">{{ stats.trading }} figurina{{ 's' if stats.trading != 1 else '' }} para trocar</p>
+        <div class="sort-controls">
+            <button class="sort-btn rep-sort-btn active" data-mode="prefix" onclick="sortRepList('prefix')">ABC</button>
+            <button class="sort-btn rep-sort-btn" data-mode="album" onclick="sortRepList('album')">📋 Álbum</button>
+            <button class="sort-btn rep-sort-btn" data-mode="alpha" onclick="sortRepList('alpha')">A–Z</button>
+        </div>
+    </div>
+    {% for country in sorted_data %}
+    {% if country.trading %}
+    {% for num, qty in country.trading.items() | sort %}
+    <div class="rep-list-item"
+         data-country="{{ country.name }}"
+         data-number="{{ num }}"
+         data-prefix="{{ country.prefix }}"
+         data-sort-name="{{ country.sort_name }}"
+         data-album-index="{{ country.album_index }}">
+        <div class="rep-list-flag">
+            {% if country.code == 'fwc' %}🏆
+            {% elif country.code == 'coca' %}🥤
+            {% else %}<img class="flag-img" src="https://flagcdn.com/w40/{{ country.code }}.png" alt="">{% endif %}
+        </div>
+        <div class="rep-list-label">
+            <span class="rep-list-prefix">{{ country.prefix }}</span>
+            <span class="rep-list-num">#{{ num }}</span>
+        </div>
+        <div class="rep-list-controls">
+            <button class="rep-list-btn btn-red" onclick="repListUpdate('{{ country.name }}', {{ num }}, -1, this)">−</button>
+            <span class="rep-list-qty">{{ qty }}</span>
+            <button class="rep-list-btn btn-green" onclick="repListUpdate('{{ country.name }}', {{ num }}, 1, this)">+</button>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+    {% else %}
+    <p class="trades-empty" style="padding:24px 0;text-align:center">Nenhuma repetida registrada ainda.</p>
     {% endif %}
 </div>
 {% endif %}

@@ -276,22 +276,73 @@ function clearSearch() {
 
 // ── View toggle (cards / missing) ──────────────────────────────────────────────
 function setView(view) {
-    const albumList = document.getElementById('album-list');
+    const albumList   = document.getElementById('album-list');
     const missingView = document.getElementById('missing-view');
-    const searchBar = document.querySelector('.search-bar');
+    const tradingView = document.getElementById('rep-list-view');
+    const searchBar   = document.querySelector('.search-bar');
 
-    if (view === 'missing') {
-        albumList.classList.add('hidden');
-        if (missingView) missingView.classList.remove('hidden');
-        if (searchBar) searchBar.classList.add('hidden');
-    } else {
-        albumList.classList.remove('hidden');
-        if (missingView) missingView.classList.add('hidden');
-        if (searchBar) searchBar.classList.remove('hidden');
-    }
+    albumList.classList.toggle('hidden',   view !== 'cards');
+    missingView?.classList.toggle('hidden', view !== 'missing');
+    tradingView?.classList.toggle('hidden', view !== 'trading');
+    searchBar?.classList.toggle('hidden',   view !== 'cards');
 
     document.querySelectorAll('.sort-btn[data-view]').forEach(b => b.classList.remove('active'));
     document.querySelector(`.sort-btn[data-view="${view}"]`)?.classList.add('active');
+}
+
+function sortRepList(mode) {
+    const list = document.getElementById('rep-list-view');
+    const items = Array.from(list.querySelectorAll('.rep-list-item'));
+
+    items.sort((a, b) => {
+        let diff = 0;
+        if (mode === 'album') {
+            diff = parseInt(a.dataset.albumIndex) - parseInt(b.dataset.albumIndex);
+        } else if (mode === 'alpha') {
+            diff = (a.dataset.sortName || '').localeCompare(b.dataset.sortName || '', 'pt-BR', { sensitivity: 'base' });
+        } else {
+            diff = (a.dataset.prefix || '').localeCompare(b.dataset.prefix || '', 'en', { sensitivity: 'base' });
+        }
+        return diff !== 0 ? diff : parseInt(a.dataset.number) - parseInt(b.dataset.number);
+    });
+
+    items.forEach(item => list.appendChild(item));
+    document.querySelectorAll('.rep-sort-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.rep-sort-btn[data-mode="${mode}"]`)?.classList.add('active');
+}
+
+function repListUpdate(country, number, delta, btn) {
+    fetch('/api/sticker/trade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ country, number, delta }),
+    })
+        .then(r => r.json())
+        .then(data => {
+            const item = btn.closest('.rep-list-item');
+            const qtyEl = item.querySelector('.rep-list-qty');
+            qtyEl.textContent = data.quantity;
+
+            if (data.quantity === 0) {
+                item.style.transition = 'opacity 0.3s';
+                item.style.opacity = '0';
+                setTimeout(() => item.remove(), 300);
+            }
+
+            // Sync the per-country rep-grid if it's open
+            const card = document.querySelector(`.country-card[data-country-name="${CSS.escape(country.toLowerCase())}"]`);
+            if (card) {
+                const repItem = card.querySelector(`.rep-item[data-country="${CSS.escape(country)}"][data-number="${number}"]`);
+                if (repItem) {
+                    const cardQty = repItem.querySelector('.rep-qty');
+                    if (cardQty) cardQty.textContent = data.quantity;
+                    repItem.classList.toggle('has-stock', data.quantity > 0);
+                }
+                updateRepCount(card);
+            }
+            updateGlobalStats();
+        })
+        .catch(() => showToast('Erro ao salvar.'));
 }
 
 // ── Country card collapse ──────────────────────────────────────────────────────

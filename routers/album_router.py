@@ -62,11 +62,14 @@ def build_sticker_data(user_id: int, db: Session) -> list:
         trading_nums = trading_map.get(country, {})
         wishlist_nums = wishlist_map.get(country, set())
         prefix = country.split("(")[0].strip() if "(" in country else country
+        sort_name = country.split("(")[1].rstrip(")").strip() if "(" in country else country
         start = info.get("start", 1)
         result.append({
             "name": country,
             "code": info["code"],
             "prefix": prefix,
+            "sort_name": sort_name,
+            "album_index": len(result),
             "count": info["count"],
             "start": start,
             "page": info.get("page"),
