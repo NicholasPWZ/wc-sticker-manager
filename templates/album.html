@@ -98,6 +98,16 @@
             <button class="sort-btn rep-sort-btn" data-mode="alpha" onclick="sortRepList('alpha')">A–Z</button>
         </div>
     </div>
+    <div class="rep-add-bar">
+        <input type="text" id="rep-add-country" class="rep-add-code" placeholder="BRA"
+               maxlength="5" autocomplete="off" autocapitalize="characters"
+               oninput="this.value=this.value.toUpperCase()"
+               onkeydown="if(event.key==='Enter')document.getElementById('rep-add-number').focus()">
+        <span class="rep-add-hash">#</span>
+        <input type="number" id="rep-add-number" class="rep-add-num" placeholder="0" min="0" max="20"
+               onkeydown="if(event.key==='Enter')addRepetida()">
+        <button class="rep-add-btn" onclick="addRepetida()">＋ Adicionar</button>
+    </div>
     {% for country in sorted_data %}
     {% if country.trading %}
     {% for num, qty in country.trading.items() | sort %}

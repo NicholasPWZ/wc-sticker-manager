@@ -290,6 +290,81 @@ function setView(view) {
     document.querySelector(`.sort-btn[data-view="${view}"]`)?.classList.add('active');
 }
 
+function addRepetida() {
+    const code = document.getElementById('rep-add-country').value.trim().toUpperCase();
+    const number = parseInt(document.getElementById('rep-add-number').value);
+    const country = COUNTRY_CODES[code];
+
+    if (!country) { showToast('Código desconhecido: ' + code); return; }
+    if (isNaN(number) || number < 0) { showToast('Número inválido.'); return; }
+
+    fetch('/api/sticker/trade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ country, number, delta: 1 }),
+    })
+        .then(r => r.json())
+        .then(data => {
+            // Update existing item in list
+            const existing = document.querySelector(
+                `.rep-list-item[data-country="${CSS.escape(country)}"][data-number="${number}"]`
+            );
+            if (existing) {
+                existing.querySelector('.rep-list-qty').textContent = data.quantity;
+            } else {
+                // Build new item from country card data
+                const card = document.querySelector(
+                    `.country-card[data-country-name="${CSS.escape(country.toLowerCase())}"]`
+                );
+                const prefix = card?.dataset.prefix || code;
+                const sortName = card?.dataset.sortName || '';
+                const albumIndex = card?.dataset.index || '999';
+                const flagCode = card?.dataset.countryCode || '';
+                const flagHtml = flagCode === 'fwc' ? '🏆'
+                    : flagCode === 'coca' ? '🥤'
+                    : `<img class="flag-img" src="https://flagcdn.com/w40/${flagCode}.png" alt="">`;
+
+                const safeCountry = country.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                const item = document.createElement('div');
+                item.className = 'rep-list-item';
+                Object.assign(item.dataset, { country, number, prefix, sortName, albumIndex });
+                item.innerHTML = `
+                    <div class="rep-list-flag">${flagHtml}</div>
+                    <div class="rep-list-label">
+                        <span class="rep-list-prefix">${prefix}</span>
+                        <span class="rep-list-num">#${number}</span>
+                    </div>
+                    <div class="rep-list-controls">
+                        <button class="rep-list-btn btn-red" onclick="repListUpdate('${safeCountry}',${number},-1,this)">−</button>
+                        <span class="rep-list-qty">${data.quantity}</span>
+                        <button class="rep-list-btn btn-green" onclick="repListUpdate('${safeCountry}',${number},1,this)">+</button>
+                    </div>`;
+                document.getElementById('rep-list-view').appendChild(item);
+            }
+
+            // Sync country card rep-grid
+            const card = document.querySelector(
+                `.country-card[data-country-name="${CSS.escape(country.toLowerCase())}"]`
+            );
+            if (card) {
+                const repItem = card.querySelector(
+                    `.rep-item[data-country="${CSS.escape(country)}"][data-number="${number}"]`
+                );
+                if (repItem) {
+                    const qtyEl = repItem.querySelector('.rep-qty');
+                    if (qtyEl) qtyEl.textContent = data.quantity;
+                    repItem.classList.add('has-stock');
+                }
+                updateRepCount(card);
+            }
+            updateGlobalStats();
+            showToast(`${code} #${number} → ×${data.quantity}`);
+            document.getElementById('rep-add-number').value = '';
+            document.getElementById('rep-add-country').focus();
+        })
+        .catch(() => showToast('Erro ao adicionar.'));
+}
+
 function sortRepList(mode) {
     const list = document.getElementById('rep-list-view');
     const items = Array.from(list.querySelectorAll('.rep-list-item'));
