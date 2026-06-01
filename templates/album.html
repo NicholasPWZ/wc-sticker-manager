@@ -344,7 +344,7 @@
             </div>
             {% endif %}
             <button class="btn-trade-sm match-trade-btn"
-                    onclick="openTradeModal({{ m.user_id }}, '{{ m.they_give[0][0] }}', {{ m.they_give[0][1] }}, 1)">
+                    onclick="openTradeModalFromMatch({{ m.user_id }}, '{{ m.they_give[0][0] }}', {{ m.they_give[0][1] }}, {{ m.i_give | tojson }})">
                 🔄 Propor Troca
             </button>
         </div>

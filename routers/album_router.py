@@ -173,16 +173,16 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
     # Matches (own album only)
     matches = compute_matches(current_user.id, db) if is_own else []
 
-    # Visitor data (other's album)
-    my_trading = []
+    # Always load current user's trading stickers (needed for trade modal on own album matches too)
+    trade_rows = db.query(TradingSticker).filter(
+        TradingSticker.user_id == current_user.id, TradingSticker.quantity > 0
+    ).all()
+    my_trading = [{"country": r.country, "number": r.number, "quantity": r.quantity} for r in trade_rows]
+
+    # Visitor-specific data (other's album)
     my_owned_keys: set[str] = set()
     owner_missing_keys: list[str] = []
     if not is_own:
-        trade_rows = db.query(TradingSticker).filter(
-            TradingSticker.user_id == current_user.id, TradingSticker.quantity > 0
-        ).all()
-        my_trading = [{"country": r.country, "number": r.number, "quantity": r.quantity} for r in trade_rows]
-
         owned_rows = db.query(AlbumSticker).filter(AlbumSticker.user_id == current_user.id).all()
         my_owned_keys = {f"{r.country}|{r.number}" for r in owned_rows}
 

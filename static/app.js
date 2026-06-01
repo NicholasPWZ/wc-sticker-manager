@@ -502,33 +502,36 @@ function updateTrading(country, number, delta, btn) {
 let pendingTrade = {};
 let selectedOffers = new Set();
 
-function openTradeModal(recipientId, country, number, qty) {
+function openTradeModal(recipientId, country, number, qty, missingKeysOverride) {
     pendingTrade = { recipientId, wantCountry: country, wantNumber: number };
     selectedOffers.clear();
 
-    document.getElementById('modal-want-label').textContent = `${country} #${number} (disponível: ${qty})`;
+    const shortName = c => c.includes('(') ? c.split('(')[0].trim() : c;
+    document.getElementById('modal-want-label').textContent =
+        `${shortName(country)} #${number}${qty ? ' (disponível: ' + qty + ')' : ''}`;
     document.getElementById('modal-note').value = '';
+
+    const missing = missingKeysOverride instanceof Set ? missingKeysOverride : OWNER_MISSING_KEYS;
 
     const offerList = document.getElementById('modal-offer-list');
     offerList.innerHTML = '';
 
     if (!MY_TRADING || MY_TRADING.length === 0) {
-        offerList.innerHTML = '<span style="color:var(--text-muted);font-size:13px">Você não tem repetidas para oferecer.</span>';
+        offerList.innerHTML = '<span style="color:var(--text-muted);font-size:13px">Você não tem repetidas registradas para oferecer. Adicione repetidas no seu álbum primeiro.</span>';
     } else {
         MY_TRADING.forEach(item => {
             const key = `${item.country}|${item.number}`;
-            const isSuggested = OWNER_MISSING_KEYS.has(key);
+            const isSuggested = missing.has(key);
             const div = document.createElement('div');
             div.className = 'offer-item' + (isSuggested ? ' suggested' : '');
             div.dataset.key = key;
-            div.textContent = `${item.country.split('(')[0]?.trim() || item.country} #${item.number} ×${item.quantity}`;
+            div.textContent = `${shortName(item.country)} #${item.number} ×${item.quantity}`;
             div.title = isSuggested ? 'Eles precisam desta!' : '';
             div.onclick = () => {
                 div.classList.toggle('selected');
                 if (selectedOffers.has(key)) selectedOffers.delete(key);
                 else selectedOffers.add(key);
             };
-            // Auto-select items they need
             if (isSuggested) {
                 div.classList.add('selected');
                 selectedOffers.add(key);
@@ -538,6 +541,12 @@ function openTradeModal(recipientId, country, number, qty) {
     }
 
     document.getElementById('trade-modal').classList.remove('hidden');
+}
+
+function openTradeModalFromMatch(recipientId, country, number, iGiveList) {
+    // Build the set of stickers the other user is missing (= what I can give them)
+    const theirMissing = new Set((iGiveList || []).map(([c, n]) => `${c}|${n}`));
+    openTradeModal(recipientId, country, number, null, theirMissing);
 }
 
 function closeTradeModal() {
