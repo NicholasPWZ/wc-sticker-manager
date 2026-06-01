@@ -43,11 +43,13 @@
     </div>
 
     <!-- Stats chips -->
-    <div class="stats-chips">
-        <span class="chip chip-blue">📘 {{ stats.owned }}/{{ stats.total }}</span>
-        <span class="chip chip-orange">🔄 {{ stats.trading }}</span>
-        <span class="chip chip-purple">📦 {{ stats.full }}</span>
-        <span class="chip chip-green">🎲 {{ stats.probability }}%/pacote</span>
+    <div class="stats-row">
+        <div class="stats-chips">
+            <span class="chip chip-blue">📘 {{ stats.owned }}/{{ stats.total }}</span>
+            <span class="chip chip-orange">🔄 {{ stats.trading }}</span>
+            <span class="chip chip-purple">📦 {{ stats.full }}</span>
+            <span class="chip chip-green">🎲 {{ stats.probability }}%/pacote</span>
+        </div>
         {% if is_own_album %}
         <button class="copy-btn" onclick="copyOwnedList()" title="Copiar figurinhas que tenho">📋 Copiar</button>
         {% endif %}
@@ -74,9 +76,9 @@
 <!-- ── Missing list view (own album only) ── -->
 {% if is_own_album %}
 <div class="missing-view hidden" id="missing-view">
-    <div class="log-toggle-bar" style="margin-bottom:10px">
+    <div class="stats-row" style="margin-bottom:10px">
         <h3 class="missing-view-title" style="margin:0">🔍 Faltam {{ stats.total - stats.owned }} figurinhas</h3>
-        <button class="copy-btn" onclick="copyMissingList()" title="Copiar lista">📋 Copiar</button>
+        <button class="copy-btn" onclick="copyMissingList()">📋 Copiar</button>
     </div>
     {% if missing_by_country %}
     <div class="missing-list">
@@ -106,15 +108,14 @@
     {% for country in sorted_data %}{% if country.trading %}{% set has_any.v = true %}{% endif %}{% endfor %}
     {% if has_any.v %}
     <div class="rep-list-topbar">
-        <div class="log-toggle-bar" style="width:100%">
+        <div class="stats-row">
             <p class="rep-list-header">{{ stats.trading }} figurina{{ 's' if stats.trading != 1 else '' }} para trocar</p>
-            <button class="copy-btn" onclick="copyRepList()" title="Copiar lista">📋 Copiar</button>
+            <button class="copy-btn" onclick="copyRepList()">📋 Copiar</button>
         </div>
         <div class="sort-controls">
             <button class="sort-btn rep-sort-btn active" data-mode="prefix" onclick="sortRepList('prefix')">ABC</button>
             <button class="sort-btn rep-sort-btn" data-mode="album" onclick="sortRepList('album')">📋 Álbum</button>
             <button class="sort-btn rep-sort-btn" data-mode="alpha" onclick="sortRepList('alpha')">A–Z</button>
-        </div>
         </div>
     </div>
     <div class="rep-add-bar">
