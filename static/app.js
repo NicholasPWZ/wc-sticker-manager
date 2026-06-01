@@ -161,6 +161,46 @@ function undoLog(index) {
         .catch(() => showToast('Erro ao desfazer.'));
 }
 
+function copyOwnedList() {
+    const cards = document.querySelectorAll('.country-card');
+    const lines = [];
+    cards.forEach(card => {
+        const prefix = card.dataset.prefix || '';
+        const nums = [...card.querySelectorAll('.sticker.checked')]
+            .map(s => s.dataset.number)
+            .filter(Boolean)
+            .sort((a, b) => parseInt(a) - parseInt(b));
+        if (nums.length) lines.push(`${prefix} ${nums.join(' ')}`);
+    });
+    if (!lines.length) { showToast('Nenhuma figurinha marcada.'); return; }
+    navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('Figurinhas copiadas! ✔'));
+}
+
+function copyMissingList() {
+    const rows = document.querySelectorAll('.missing-row');
+    if (!rows.length) { showToast('Nenhuma figurinha faltante.'); return; }
+    const lines = [`Figurinhas faltantes - Álbum WC 2026`];
+    rows.forEach(row => {
+        const prefix = row.dataset.prefix || '';
+        const nums = row.querySelector('.missing-nums')?.textContent?.trim();
+        if (prefix && nums) lines.push(`${prefix}: ${nums}`);
+    });
+    navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('Lista copiada! ✔'));
+}
+
+function copyRepList() {
+    const items = document.querySelectorAll('.rep-list-item');
+    if (!items.length) { showToast('Nenhuma repetida para copiar.'); return; }
+    const lines = [`Repetidas disponíveis - Álbum WC 2026`];
+    items.forEach(item => {
+        const prefix = item.querySelector('.rep-list-prefix')?.textContent?.trim();
+        const num = item.querySelector('.rep-list-num')?.textContent?.trim();
+        const qty = parseInt(item.querySelector('.rep-list-qty')?.textContent || '1');
+        if (prefix && num) lines.push(`${prefix} ${num}${qty > 1 ? ` ×${qty}` : ''}`);
+    });
+    navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('Repetidas copiadas! ✔'));
+}
+
 function toggleLog() {
     const items = document.getElementById('log-items');
     const chevron = document.getElementById('log-chevron');

@@ -48,6 +48,9 @@
         <span class="chip chip-orange">🔄 {{ stats.trading }}</span>
         <span class="chip chip-purple">📦 {{ stats.full }}</span>
         <span class="chip chip-green">🎲 {{ stats.probability }}%/pacote</span>
+        {% if is_own_album %}
+        <button class="copy-btn" onclick="copyOwnedList()" title="Copiar figurinhas que tenho">📋 Copiar</button>
+        {% endif %}
     </div>
 
     <div class="progress-container">
@@ -71,11 +74,14 @@
 <!-- ── Missing list view (own album only) ── -->
 {% if is_own_album %}
 <div class="missing-view hidden" id="missing-view">
-    <h3 class="missing-view-title">🔍 Faltam {{ stats.total - stats.owned }} figurinhas</h3>
+    <div class="log-toggle-bar" style="margin-bottom:10px">
+        <h3 class="missing-view-title" style="margin:0">🔍 Faltam {{ stats.total - stats.owned }} figurinhas</h3>
+        <button class="copy-btn" onclick="copyMissingList()" title="Copiar lista">📋 Copiar</button>
+    </div>
     {% if missing_by_country %}
     <div class="missing-list">
         {% for country in missing_by_country %}
-        <div class="missing-row">
+        <div class="missing-row" data-prefix="{{ country.prefix }}">
             <span class="missing-country">
                 {% if country.code == 'fwc' %}<img class="flag-img-sm" src="https://digitalhub.fifa.com/transform/157d23bf-7e13-4d7b-949e-5d27d340987e/WC26_Logo?&io=transform:fill&quality=75" alt="WC26">
                 {% elif country.code == 'coca' %}🥤
@@ -100,11 +106,15 @@
     {% for country in sorted_data %}{% if country.trading %}{% set has_any.v = true %}{% endif %}{% endfor %}
     {% if has_any.v %}
     <div class="rep-list-topbar">
-        <p class="rep-list-header">{{ stats.trading }} figurina{{ 's' if stats.trading != 1 else '' }} para trocar</p>
+        <div class="log-toggle-bar" style="width:100%">
+            <p class="rep-list-header">{{ stats.trading }} figurina{{ 's' if stats.trading != 1 else '' }} para trocar</p>
+            <button class="copy-btn" onclick="copyRepList()" title="Copiar lista">📋 Copiar</button>
+        </div>
         <div class="sort-controls">
             <button class="sort-btn rep-sort-btn active" data-mode="prefix" onclick="sortRepList('prefix')">ABC</button>
             <button class="sort-btn rep-sort-btn" data-mode="album" onclick="sortRepList('album')">📋 Álbum</button>
             <button class="sort-btn rep-sort-btn" data-mode="alpha" onclick="sortRepList('alpha')">A–Z</button>
+        </div>
         </div>
     </div>
     <div class="rep-add-bar">

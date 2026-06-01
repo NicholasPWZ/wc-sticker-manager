@@ -439,8 +439,11 @@ button, a { touch-action: manipulation; }
 
 /* ── Change log ───────────────────────────────────────────────────────────── */
 .change-log { margin: 10px 0; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
-.log-toggle { width: 100%; background: none; border: none; text-align: left; padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.log-toggle-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.log-toggle { flex: 1; background: none; border: none; text-align: left; padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
 .log-toggle:hover { background: var(--bg); }
+.copy-btn { background: none; border: 1.5px solid var(--border); border-radius: 7px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; white-space: nowrap; flex-shrink: 0; margin-right: 10px; }
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
 .log-items { padding: 0 10px 8px; display: flex; flex-direction: column; gap: 4px; }
 .log-entry { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-bottom: 1px solid var(--border); font-size: 13px; }
 .log-entry:last-child { border-bottom: none; }
