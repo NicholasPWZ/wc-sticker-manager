@@ -181,7 +181,7 @@ function addToWishlistSection(country, number, stickerEl) {
         const code = card?.dataset.countryCode || '';
         const prefix = card?.dataset.prefix || country.split('(')[0].trim();
         const displayName = country.includes('(') ? country.split('(')[1].replace(')', '').trim() : '';
-        let flagHtml = code === 'fwc' ? '🏆' : code === 'coca' ? '🥤'
+        let flagHtml = code === 'fwc' ? '<img class="flag-img-sm" src="https://digitalhub.fifa.com/transform/157d23bf-7e13-4d7b-949e-5d27d340987e/WC26_Logo?&io=transform:fill&quality=75" alt="WC26">' : code === 'coca' ? '🥤'
             : `<img class="flag-img-sm" src="https://flagcdn.com/w20/${code}.png" alt="">`;
 
         row = document.createElement('div');
@@ -320,7 +320,7 @@ function addRepetida() {
                 const sortName = card?.dataset.sortName || '';
                 const albumIndex = card?.dataset.index || '999';
                 const flagCode = card?.dataset.countryCode || '';
-                const flagHtml = flagCode === 'fwc' ? '🏆'
+                const flagHtml = flagCode === 'fwc' ? '<img class="flag-img" src="https://digitalhub.fifa.com/transform/157d23bf-7e13-4d7b-949e-5d27d340987e/WC26_Logo?&io=transform:fill&quality=75" alt="WC26">'
                     : flagCode === 'coca' ? '🥤'
                     : `<img class="flag-img" src="https://flagcdn.com/w40/${flagCode}.png" alt="">`;
 

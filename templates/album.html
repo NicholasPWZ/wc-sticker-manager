@@ -68,7 +68,7 @@
         {% for country in missing_by_country %}
         <div class="missing-row">
             <span class="missing-country">
-                {% if country.code == 'fwc' %}🏆
+                {% if country.code == 'fwc' %}<img class="flag-img-sm" src="https://digitalhub.fifa.com/transform/157d23bf-7e13-4d7b-949e-5d27d340987e/WC26_Logo?&io=transform:fill&quality=75" alt="WC26">
                 {% elif country.code == 'coca' %}🥤
                 {% else %}<img class="flag-img-sm" src="https://flagcdn.com/w20/{{ country.code }}.png" alt="">{% endif %}
                 {{ country.name }}
@@ -118,7 +118,7 @@
          data-sort-name="{{ country.sort_name }}"
          data-album-index="{{ country.album_index }}">
         <div class="rep-list-flag">
-            {% if country.code == 'fwc' %}🏆
+            {% if country.code == 'fwc' %}<img class="flag-img" src="https://digitalhub.fifa.com/transform/157d23bf-7e13-4d7b-949e-5d27d340987e/WC26_Logo?&io=transform:fill&quality=75" alt="WC26">
             {% elif country.code == 'coca' %}🥤
             {% else %}<img class="flag-img" src="https://flagcdn.com/w40/{{ country.code }}.png" alt="">{% endif %}
         </div>
@@ -156,7 +156,7 @@
     <div class="country-header" onclick="toggleCountry(this)">
         <span class="country-chevron">▶</span>
         <span class="country-name">
-            {% if country.code == 'fwc' %}<span class="flag-emoji">🏆</span>
+            {% if country.code == 'fwc' %}<img class="flag-img" src="https://digitalhub.fifa.com/transform/157d23bf-7e13-4d7b-949e-5d27d340987e/WC26_Logo?&io=transform:fill&quality=75" alt="WC26">
             {% elif country.code == 'coca' %}<span class="flag-emoji">🥤</span>
             {% else %}<img class="flag-img" src="https://flagcdn.com/w40/{{ country.code }}.png" alt="">{% endif %}
             {{ country.name }}
@@ -268,7 +268,7 @@
         {% for entry in wishlist_section %}
         <div class="wishlist-row" data-wishlist-country="{{ entry.name }}">
             <span class="wishlist-country">
-                {% if entry.code == 'fwc' %}🏆{% elif entry.code == 'coca' %}🥤
+                {% if entry.code == 'fwc' %}<img class="flag-img-sm" src="https://digitalhub.fifa.com/transform/157d23bf-7e13-4d7b-949e-5d27d340987e/WC26_Logo?&io=transform:fill&quality=75" alt="WC26">{% elif entry.code == 'coca' %}🥤
                 {% else %}<img class="flag-img-sm" src="https://flagcdn.com/w20/{{ entry.code }}.png" alt="">{% endif %}
                 <strong>{{ entry.prefix }}</strong> {{ entry.name.split('(')[1].rstrip(')') if '(' in entry.name else '' }}
             </span>
