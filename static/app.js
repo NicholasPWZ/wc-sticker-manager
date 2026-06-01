@@ -63,46 +63,114 @@ function toggleDarkMode() {
     document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️' : '🌙';
 })();
 
-// ── Edit / Wishlist modes ──────────────────────────────────────────────────────
-let editMode = false;
+// ── Wishlist mode ──────────────────────────────────────────────────────────────
 let wishMode = false;
-
-function toggleEditMode() {
-    editMode = !editMode;
-    if (editMode && wishMode) toggleWishlistMode(); // mutually exclusive
-    const btn = document.getElementById('edit-btn');
-    if (btn) { btn.classList.toggle('active', editMode); btn.textContent = editMode ? '🔒 Parar' : '✏️ Editar'; }
-    const sideBtn = document.getElementById('sidebar-edit-btn');
-    if (sideBtn) { sideBtn.classList.toggle('active', editMode); sideBtn.textContent = editMode ? '🔒 Parar Edição' : '✏️ Editar Álbum'; }
-    document.querySelectorAll('.sticker').forEach(s => {
-        s.classList.toggle('editable', editMode);
-        s.classList.remove('wish-mode-on');
-    });
-}
 
 function toggleWishlistMode() {
     wishMode = !wishMode;
-    if (wishMode && editMode) toggleEditMode();
     const btn = document.getElementById('wish-btn');
     if (btn) { btn.classList.toggle('active', wishMode); btn.textContent = wishMode ? '⭐ Sair' : '⭐ Desejos'; }
     const sideBtn = document.getElementById('sidebar-wish-btn');
     if (sideBtn) { sideBtn.classList.toggle('active', wishMode); sideBtn.textContent = wishMode ? '⭐ Sair Desejos' : '⭐ Lista de Desejos'; }
     document.querySelectorAll('.sticker').forEach(s => {
-        s.classList.remove('editable');
         s.classList.toggle('wish-mode-on', wishMode && !s.classList.contains('checked'));
     });
 }
 
 function handleStickerClick(el) {
     if (!IS_OWN_ALBUM) return;
-
     if (wishMode && !el.classList.contains('checked')) {
         toggleWishlistItem(el);
         return;
     }
-    if (!editMode) return;
     toggleStickerOwned(el);
 }
+
+// Make stickers always clickable on own album
+if (typeof IS_OWN_ALBUM !== 'undefined' && IS_OWN_ALBUM) {
+    document.querySelectorAll('.sticker').forEach(s => s.classList.add('editable'));
+}
+
+// ── Change log ────────────────────────────────────────────────────────────────
+const LOG_KEY = () => `wc_log_${typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : 0}`;
+const SAO_PAULO_TZ = 'America/Sao_Paulo';
+
+function nowSP() {
+    return new Date().toLocaleTimeString('pt-BR', { timeZone: SAO_PAULO_TZ, hour: '2-digit', minute: '2-digit' });
+}
+
+function loadLog() {
+    try { return JSON.parse(localStorage.getItem(LOG_KEY()) || '[]'); } catch { return []; }
+}
+
+function saveLog(log) {
+    localStorage.setItem(LOG_KEY(), JSON.stringify(log.slice(0, 5)));
+}
+
+function logChange(country, number, owned) {
+    const prefix = country.includes('(') ? country.split('(')[0].trim() : country;
+    const entry = { country, prefix, number, owned, time: nowSP() };
+    const log = [entry, ...loadLog()].slice(0, 5);
+    saveLog(log);
+    renderLog();
+}
+
+function renderLog() {
+    const log = loadLog();
+    const logEl = document.getElementById('change-log');
+    const itemsEl = document.getElementById('log-items');
+    if (!logEl || !itemsEl) return;
+
+    if (log.length === 0) { logEl.classList.add('hidden'); return; }
+    logEl.classList.remove('hidden');
+
+    itemsEl.innerHTML = log.map((e, i) => `
+        <div class="log-entry">
+            <span class="log-icon ${e.owned ? 'log-add' : 'log-remove'}">${e.owned ? '✔' : '✕'}</span>
+            <span class="log-text">${e.prefix} #${e.number}</span>
+            <span class="log-time">${e.time}</span>
+            <button class="log-undo" onclick="undoLog(${i})">Desfazer</button>
+        </div>
+    `).join('');
+}
+
+function undoLog(index) {
+    const log = loadLog();
+    const entry = log[index];
+    if (!entry) return;
+
+    fetch('/api/sticker/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ country: entry.country, number: entry.number }),
+    })
+        .then(r => r.json())
+        .then(data => {
+            const selector = `.sticker[data-country="${CSS.escape(entry.country)}"][data-number="${entry.number}"]`;
+            document.querySelectorAll(selector).forEach(el => {
+                el.classList.toggle('checked', data.owned);
+                el.classList.remove('wished');
+                updateCountryCount(el.closest('.country-card'));
+            });
+            updateGlobalStats();
+            log.splice(index, 1);
+            saveLog(log);
+            renderLog();
+            showToast(`${entry.prefix} #${entry.number} desfeito!`);
+        })
+        .catch(() => showToast('Erro ao desfazer.'));
+}
+
+function toggleLog() {
+    const items = document.getElementById('log-items');
+    const chevron = document.getElementById('log-chevron');
+    const open = !items.classList.contains('hidden');
+    items.classList.toggle('hidden', open);
+    if (chevron) chevron.textContent = open ? '▶' : '▼';
+}
+
+// Render log on page load
+document.addEventListener('DOMContentLoaded', renderLog);
 
 function toggleStickerOwned(el) {
     const country = el.dataset.country;
@@ -119,6 +187,7 @@ function toggleStickerOwned(el) {
             if (data.owned) el.classList.remove('wish-mode-on');
             updateCountryCount(el.closest('.country-card'));
             updateGlobalStats();
+            logChange(country, number, data.owned);
         })
         .catch(() => showToast('Erro ao salvar.'));
 }
@@ -143,11 +212,6 @@ function toggleWishlistItem(el) {
             showToast(data.wished ? '⭐ Adicionado à lista de desejos!' : 'Removido da lista de desejos.');
         })
         .catch(() => showToast('Erro ao salvar.'));
-}
-
-// ── Auto-edit mode on load ────────────────────────────────────────────────────
-if (typeof AUTO_EDIT !== 'undefined' && AUTO_EDIT && IS_OWN_ALBUM) {
-    document.addEventListener('DOMContentLoaded', () => toggleEditMode());
 }
 
 // ── Wishlist remove (called from section ✕ button) ───────────────────────────

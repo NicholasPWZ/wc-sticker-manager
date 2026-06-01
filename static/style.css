@@ -437,6 +437,21 @@ button, a { touch-action: manipulation; }
     .chip { font-size: 10px; padding: 2px 6px; }
 }
 
+/* ── Change log ───────────────────────────────────────────────────────────── */
+.change-log { margin: 10px 0; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+.log-toggle { width: 100%; background: none; border: none; text-align: left; padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.log-toggle:hover { background: var(--bg); }
+.log-items { padding: 0 10px 8px; display: flex; flex-direction: column; gap: 4px; }
+.log-entry { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.log-entry:last-child { border-bottom: none; }
+.log-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.log-add { background: #e8f5e9; color: #2e7d32; }
+.log-remove { background: #ffebee; color: #c62828; }
+.log-text { font-weight: 700; flex: 1; color: var(--text); }
+.log-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.log-undo { background: none; border: 1.5px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
+.log-undo:hover { border-color: var(--orange); color: var(--orange); }
+
 /* ── Repetidas list view ──────────────────────────────────────────────────── */
 .rep-list-view { display: flex; flex-direction: column; gap: 6px; }
 .rep-list-topbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 2px; }

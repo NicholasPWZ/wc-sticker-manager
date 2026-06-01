@@ -5,7 +5,6 @@
 {% block header_actions %}
 {% if is_own_album %}
 <div class="header-edit-group">
-    <button class="btn-edit" id="edit-btn" onclick="toggleEditMode()">✏️ Editar</button>
     <button class="btn-edit" id="wish-btn" onclick="toggleWishlistMode()">⭐ Desejos</button>
     <button class="btn-edit" onclick="openBulkModal()">📋 Entrada</button>
 </div>
@@ -58,6 +57,16 @@
         {{ stats.owned }} de {{ stats.total }} figurinhas ({{ (stats.owned / stats.total * 100) | round(1) }}%). Faltam {{ stats.total - stats.owned }}!
     </span>
 </div>
+
+<!-- ── Change log (own album only) ── -->
+{% if is_own_album %}
+<div class="change-log hidden" id="change-log">
+    <button class="log-toggle" onclick="toggleLog()">
+        🕓 Últimas alterações <span id="log-chevron">▶</span>
+    </button>
+    <div class="log-items hidden" id="log-items"></div>
+</div>
+{% endif %}
 
 <!-- ── Missing list view (own album only) ── -->
 {% if is_own_album %}
@@ -461,7 +470,6 @@
 {% if is_own_album %}
 <div class="sidebar-actions">
     <p class="sidebar-actions-title">Ações</p>
-    <button class="sidebar-action-btn" id="sidebar-edit-btn" onclick="toggleEditMode(); closeSidebar()">✏️ Editar Álbum</button>
     <button class="sidebar-action-btn" id="sidebar-wish-btn" onclick="toggleWishlistMode(); closeSidebar()">⭐ Lista de Desejos</button>
     <button class="sidebar-action-btn" onclick="openBulkModal(); closeSidebar()">📋 Entrada em Massa</button>
 </div>

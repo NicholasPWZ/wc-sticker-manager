@@ -58,19 +58,6 @@
             <input type="password" name="new_password" placeholder="••••••••" minlength="6">
         </div>
 
-        <div class="form-divider">Preferências</div>
-        <label class="toggle-row">
-            <div class="toggle-info">
-                <span class="toggle-title">Sempre em modo de edição</span>
-                <small class="toggle-desc">Seu álbum abre em modo de edição automaticamente.</small>
-            </div>
-            <div class="toggle-switch">
-                <input type="checkbox" name="always_edit_mode" id="always-edit-toggle"
-                       {% if current_user.always_edit_mode %}checked{% endif %} onchange="this.value = this.checked ? 'on' : 'off'">
-                <span class="toggle-slider"></span>
-            </div>
-        </label>
-
         <button type="submit" class="btn-primary" style="margin-top:20px;width:100%">Salvar Alterações</button>
     </form>
 </div>
