@@ -604,40 +604,58 @@ function updateTrading(country, number, delta, btn) {
 
 // ── Trade modal ────────────────────────────────────────────────────────────────
 let pendingTrade = {};
+let selectedWants = new Set();
 let selectedOffers = new Set();
+let multiWantMode = false;
+
+function updateSubmitBtn() {
+    const btn = document.getElementById('trade-submit-btn');
+    const hint = document.getElementById('trade-count-hint');
+    if (!btn) return;
+    if (!multiWantMode) {
+        btn.disabled = false;
+        if (hint) hint.textContent = '';
+        return;
+    }
+    const wCount = selectedWants.size;
+    const oCount = selectedOffers.size;
+    const ok = wCount > 0 && wCount === oCount;
+    btn.disabled = !ok;
+    if (hint) hint.textContent = ok ? '' : `Quer ${wCount} · Oferece ${oCount} — selecione quantidades iguais`;
+}
 
 function openTradeModal(recipientId, country, number, qty, missingKeysOverride, wantList) {
     pendingTrade = { recipientId, wantCountry: country, wantNumber: number };
+    selectedWants.clear();
     selectedOffers.clear();
+    multiWantMode = !!(wantList && wantList.length > 0);
 
     const shortName = c => c.includes('(') ? c.split('(')[0].trim() : c;
     const wantLabel = document.getElementById('modal-want-label');
     const wantListEl = document.getElementById('modal-want-list');
 
-    if (wantList && wantList.length > 0) {
+    if (multiWantMode) {
         wantLabel.classList.add('hidden');
         wantListEl.classList.remove('hidden');
         wantListEl.innerHTML = '';
-        wantList.forEach(([c, n], i) => {
+        wantList.forEach(([c, n]) => {
+            const key = `${c}|${n}`;
             const div = document.createElement('div');
-            div.className = 'want-item' + (i === 0 ? ' selected' : '');
+            div.className = 'want-item';
             div.textContent = `${shortName(c)} #${n}`;
             div.onclick = () => {
-                wantListEl.querySelectorAll('.want-item').forEach(el => el.classList.remove('selected'));
-                div.classList.add('selected');
-                pendingTrade.wantCountry = c;
-                pendingTrade.wantNumber = parseInt(n);
+                div.classList.toggle('selected');
+                if (selectedWants.has(key)) selectedWants.delete(key);
+                else selectedWants.add(key);
+                updateSubmitBtn();
             };
-            if (i === 0) {
-                pendingTrade.wantCountry = c;
-                pendingTrade.wantNumber = parseInt(n);
-            }
             wantListEl.appendChild(div);
         });
     } else {
         wantListEl.classList.add('hidden');
         wantLabel.classList.remove('hidden');
         wantLabel.textContent = `${shortName(country)} #${number}${qty ? ' (disponível: ' + qty + ')' : ''}`;
+        selectedWants.add(`${country}|${number}`);
     }
 
     document.getElementById('modal-note').value = '';
@@ -662,6 +680,7 @@ function openTradeModal(recipientId, country, number, qty, missingKeysOverride, 
                 div.classList.toggle('selected');
                 if (selectedOffers.has(key)) selectedOffers.delete(key);
                 else selectedOffers.add(key);
+                updateSubmitBtn();
             };
             if (isSuggested) {
                 div.classList.add('selected');
@@ -671,6 +690,7 @@ function openTradeModal(recipientId, country, number, qty, missingKeysOverride, 
         });
     }
 
+    updateSubmitBtn();
     document.getElementById('trade-modal').classList.remove('hidden');
 }
 
@@ -684,11 +704,21 @@ function openTradeModalFromBtn(btn) {
 
 function closeTradeModal() {
     document.getElementById('trade-modal').classList.add('hidden');
+    selectedWants.clear();
     selectedOffers.clear();
+    multiWantMode = false;
 }
 
 function submitTrade() {
-    const want_items = [{ country: pendingTrade.wantCountry, number: pendingTrade.wantNumber }];
+    const want_items = [];
+    if (multiWantMode) {
+        selectedWants.forEach(key => {
+            const [country, number] = key.split('|');
+            want_items.push({ country, number: parseInt(number) });
+        });
+    } else {
+        want_items.push({ country: pendingTrade.wantCountry, number: pendingTrade.wantNumber });
+    }
     const offer_items = [];
     selectedOffers.forEach(key => {
         const [country, number] = key.split('|');
