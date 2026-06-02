@@ -365,8 +365,7 @@
             {% endif %}
             <button class="btn-trade-sm match-trade-btn"
                     data-recipient="{{ m.user_id }}"
-                    data-country="{{ m.they_give[0][0] }}"
-                    data-number="{{ m.they_give[0][1] }}"
+                    data-theygive='{{ m.they_give | tojson }}'
                     data-igive='{{ m.i_give | tojson }}'
                     onclick="openTradeModalFromBtn(this)">
                 🔄 Propor Troca

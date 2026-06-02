@@ -606,13 +606,40 @@ function updateTrading(country, number, delta, btn) {
 let pendingTrade = {};
 let selectedOffers = new Set();
 
-function openTradeModal(recipientId, country, number, qty, missingKeysOverride) {
+function openTradeModal(recipientId, country, number, qty, missingKeysOverride, wantList) {
     pendingTrade = { recipientId, wantCountry: country, wantNumber: number };
     selectedOffers.clear();
 
     const shortName = c => c.includes('(') ? c.split('(')[0].trim() : c;
-    document.getElementById('modal-want-label').textContent =
-        `${shortName(country)} #${number}${qty ? ' (disponível: ' + qty + ')' : ''}`;
+    const wantLabel = document.getElementById('modal-want-label');
+    const wantListEl = document.getElementById('modal-want-list');
+
+    if (wantList && wantList.length > 0) {
+        wantLabel.classList.add('hidden');
+        wantListEl.classList.remove('hidden');
+        wantListEl.innerHTML = '';
+        wantList.forEach(([c, n], i) => {
+            const div = document.createElement('div');
+            div.className = 'want-item' + (i === 0 ? ' selected' : '');
+            div.textContent = `${shortName(c)} #${n}`;
+            div.onclick = () => {
+                wantListEl.querySelectorAll('.want-item').forEach(el => el.classList.remove('selected'));
+                div.classList.add('selected');
+                pendingTrade.wantCountry = c;
+                pendingTrade.wantNumber = parseInt(n);
+            };
+            if (i === 0) {
+                pendingTrade.wantCountry = c;
+                pendingTrade.wantNumber = parseInt(n);
+            }
+            wantListEl.appendChild(div);
+        });
+    } else {
+        wantListEl.classList.add('hidden');
+        wantLabel.classList.remove('hidden');
+        wantLabel.textContent = `${shortName(country)} #${number}${qty ? ' (disponível: ' + qty + ')' : ''}`;
+    }
+
     document.getElementById('modal-note').value = '';
 
     const missing = missingKeysOverride instanceof Set ? missingKeysOverride : OWNER_MISSING_KEYS;
@@ -649,11 +676,10 @@ function openTradeModal(recipientId, country, number, qty, missingKeysOverride) 
 
 function openTradeModalFromBtn(btn) {
     const recipientId = parseInt(btn.dataset.recipient);
-    const country = btn.dataset.country;
-    const number = parseInt(btn.dataset.number);
+    const theyGiveList = JSON.parse(btn.dataset.theygive || '[]');
     const iGiveList = JSON.parse(btn.dataset.igive || '[]');
     const theirMissing = new Set(iGiveList.map(([c, n]) => `${c}|${n}`));
-    openTradeModal(recipientId, country, number, null, theirMissing);
+    openTradeModal(recipientId, null, null, null, theirMissing, theyGiveList);
 }
 
 function closeTradeModal() {

@@ -280,6 +280,11 @@ button, a { touch-action: manipulation; }
 .offer-item.suggested { border-color: var(--accent); }
 .offer-item.suggested::before { content: '⭐ '; }
 [data-theme="dark"] .offer-item.selected { background: #2a1f0a; }
+.want-list { display: flex; flex-wrap: wrap; gap: 5px; max-height: 150px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 8px; padding: 8px; background: var(--bg); margin-top: 6px; }
+.want-item { display: inline-flex; align-items: center; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 12px; transition: all 0.15s; color: var(--text); }
+.want-item:hover { border-color: var(--blue); }
+.want-item.selected { background: #e3f2fd; border-color: var(--blue); color: var(--blue); font-weight: 700; }
+[data-theme="dark"] .want-item.selected { background: #1a2a3a; }
 .modal-input { width: 100%; padding: 8px 11px; border: 1.5px solid var(--border); border-radius: 7px; font-size: 13px; outline: none; background: var(--input-bg); color: var(--text); }
 .modal-input:focus { border-color: var(--primary); }
 .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
