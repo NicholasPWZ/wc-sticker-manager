@@ -922,6 +922,7 @@ function finalizeTrade(tradeId, btn) {
     fetch(`/api/trades/${tradeId}/finalize`, { method: 'POST' })
         .then(r => r.json())
         .then(data => {
+            if (data.error) { showToast(data.error); return; }
             if (data.completed) {
                 removeTrade(tradeId);
                 showToast('Troca concluída! 🎉');

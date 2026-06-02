@@ -66,6 +66,28 @@ async def finalize_trade(trade_id: int, request: Request, db: Session = Depends(
     if not is_requester and not is_recipient:
         return JSONResponse({"error": "Forbidden"}, status_code=403)
 
+    # If this action would complete the trade, validate stickers are still available
+    would_complete = (
+        (is_requester and trade.recipient_finalized) or
+        (is_recipient and trade.requester_finalized)
+    )
+    if would_complete:
+        missing = []
+        for item in trade.items:
+            giver_id = trade.recipient_id if item.direction == "want" else trade.requester_id
+            short = item.country.split("(")[0].strip() if "(" in item.country else item.country
+            row = db.query(TradingSticker).filter(
+                TradingSticker.user_id == giver_id,
+                TradingSticker.country == item.country,
+                TradingSticker.number == item.number,
+            ).first()
+            if not row or row.quantity < 1:
+                missing.append(f"{short} #{item.number}")
+        if missing:
+            return JSONResponse({
+                "error": f"Figurinha(s) esgotada(s): {', '.join(missing)}. Outra troca já usou estas figurinhas."
+            }, status_code=409)
+
     if is_requester:
         trade.requester_finalized = True
     else:
