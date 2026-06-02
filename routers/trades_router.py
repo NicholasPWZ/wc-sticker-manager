@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from auth import get_user_from_request
 from database import get_db
-from models import Trade, TradeItem, TradingSticker
+from models import AlbumSticker, Trade, TradeItem, TradingSticker
 
 router = APIRouter(prefix="/api/trades")
 
@@ -111,14 +111,17 @@ async def archive_trade(trade_id: int, request: Request, db: Session = Depends(g
 def _apply_trade_completion(trade: Trade, db: Session):
     for item in trade.items:
         if item.direction == "want":
-            owner_id = trade.recipient_id
+            giver_id = trade.recipient_id
+            receiver_id = trade.requester_id
         else:
-            owner_id = trade.requester_id
+            giver_id = trade.requester_id
+            receiver_id = trade.recipient_id
 
+        # Decrement giver's trading sticker
         row = (
             db.query(TradingSticker)
             .filter(
-                TradingSticker.user_id == owner_id,
+                TradingSticker.user_id == giver_id,
                 TradingSticker.country == item.country,
                 TradingSticker.number == item.number,
             )
@@ -128,3 +131,16 @@ def _apply_trade_completion(trade: Trade, db: Session):
             row.quantity = max(0, row.quantity - 1)
             if row.quantity == 0:
                 db.delete(row)
+
+        # Add to receiver's album if not already owned
+        already_owned = (
+            db.query(AlbumSticker)
+            .filter(
+                AlbumSticker.user_id == receiver_id,
+                AlbumSticker.country == item.country,
+                AlbumSticker.number == item.number,
+            )
+            .first()
+        )
+        if not already_owned:
+            db.add(AlbumSticker(user_id=receiver_id, country=item.country, number=item.number))

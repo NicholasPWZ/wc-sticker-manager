@@ -25,12 +25,20 @@ def build_page_context(current_user: User, db: Session) -> dict:
 
     active_as_requester = (
         db.query(func.count(Trade.id))
-        .filter(Trade.requester_id == current_user.id, Trade.archived == False, Trade.requester_finalized == False)
+        .filter(
+            Trade.requester_id == current_user.id,
+            Trade.archived == False,
+            or_(Trade.requester_finalized == False, Trade.recipient_finalized == False),
+        )
         .scalar()
     )
     active_as_recipient = (
         db.query(func.count(Trade.id))
-        .filter(Trade.recipient_id == current_user.id, Trade.archived == False, Trade.recipient_finalized == False)
+        .filter(
+            Trade.recipient_id == current_user.id,
+            Trade.archived == False,
+            or_(Trade.requester_finalized == False, Trade.recipient_finalized == False),
+        )
         .scalar()
     )
     return {
@@ -204,12 +212,20 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
     if is_own:
         incoming_trades = (
             db.query(Trade)
-            .filter(Trade.recipient_id == user_id, Trade.archived == False, Trade.recipient_finalized == False)
+            .filter(
+                Trade.recipient_id == user_id,
+                Trade.archived == False,
+                or_(Trade.requester_finalized == False, Trade.recipient_finalized == False),
+            )
             .order_by(Trade.created_at.desc()).all()
         )
         outgoing_trades = (
             db.query(Trade)
-            .filter(Trade.requester_id == user_id, Trade.archived == False, Trade.requester_finalized == False)
+            .filter(
+                Trade.requester_id == user_id,
+                Trade.archived == False,
+                or_(Trade.requester_finalized == False, Trade.recipient_finalized == False),
+            )
             .order_by(Trade.created_at.desc()).all()
         )
         past_trades = (
