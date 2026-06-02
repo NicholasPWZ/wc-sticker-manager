@@ -647,9 +647,12 @@ function openTradeModal(recipientId, country, number, qty, missingKeysOverride) 
     document.getElementById('trade-modal').classList.remove('hidden');
 }
 
-function openTradeModalFromMatch(recipientId, country, number, iGiveList) {
-    // Build the set of stickers the other user is missing (= what I can give them)
-    const theirMissing = new Set((iGiveList || []).map(([c, n]) => `${c}|${n}`));
+function openTradeModalFromBtn(btn) {
+    const recipientId = parseInt(btn.dataset.recipient);
+    const country = btn.dataset.country;
+    const number = parseInt(btn.dataset.number);
+    const iGiveList = JSON.parse(btn.dataset.igive || '[]');
+    const theirMissing = new Set(iGiveList.map(([c, n]) => `${c}|${n}`));
     openTradeModal(recipientId, country, number, null, theirMissing);
 }
 
