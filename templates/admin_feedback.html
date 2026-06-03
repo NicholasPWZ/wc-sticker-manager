@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback — Admin{% endblock %}
+
+{% block content %}
+<div class="admin-feedback-page">
+    <h2 class="section-title">💬 Feedback dos Usuários</h2>
+    <p class="feedback-count">{{ feedbacks | length }} entrada(s)</p>
+
+    {% if feedbacks %}
+    {% for fb in feedbacks %}
+    <div class="feedback-entry-card">
+        <div class="feedback-entry-header">
+            <span class="feedback-entry-user">{{ fb.user.display_name }} <span class="feedback-entry-username">@{{ fb.user.username }}</span></span>
+            <span class="feedback-entry-date">{{ fb.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+        </div>
+        <p class="feedback-entry-msg">{{ fb.message }}</p>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="trades-empty">Nenhum feedback recebido ainda.</p>
+    {% endif %}
+</div>
+{% endblock %}

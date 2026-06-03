@@ -77,6 +77,12 @@
             </a>
             {% endfor %}
             {% block sidebar_actions %}{% endblock %}
+            <div class="sidebar-footer">
+                <button class="sidebar-footer-btn" onclick="openFeedbackModal()">💬 Enviar Feedback</button>
+                {% if current_user.username == 'nichoeduda' %}
+                <a href="/admin/feedback" class="sidebar-footer-btn admin-link">🛡 Ver Feedbacks</a>
+                {% endif %}
+            </div>
         </aside>
 
         <main class="main-content">
@@ -92,12 +98,25 @@
         <button class="modal-close" onclick="closeTradeModal()">✕</button>
         <h3 class="modal-title">Propor Troca</h3>
         <div class="modal-section">
-            <label>Você quer:</label>
+            <div class="modal-label-row">
+                <label>Você quer:</label>
+                <div class="modal-sort-controls hidden" id="want-sort-controls">
+                    <button class="modal-sort-btn active" data-mode="abc" onclick="sortModalList('modal-want-list','abc',this)">ABC</button>
+                    <button class="modal-sort-btn" data-mode="num" onclick="sortModalList('modal-want-list','num',this)">#</button>
+                </div>
+            </div>
             <div class="trade-want-label" id="modal-want-label">—</div>
             <div id="modal-want-list" class="want-list hidden"></div>
         </div>
         <div class="modal-section">
-            <label>Você oferece <span class="label-hint">(suas repetidas — ⭐ = eles precisam)</span>:</label>
+            <div class="modal-label-row">
+                <label>Você oferece <span class="label-hint">(suas repetidas — ⭐ = eles precisam)</span>:</label>
+                <div class="modal-sort-controls" id="offer-sort-controls">
+                    <button class="modal-sort-btn active" data-mode="suggested" onclick="sortModalList('modal-offer-list','suggested',this)">⭐</button>
+                    <button class="modal-sort-btn" data-mode="abc" onclick="sortModalList('modal-offer-list','abc',this)">ABC</button>
+                    <button class="modal-sort-btn" data-mode="num" onclick="sortModalList('modal-offer-list','num',this)">#</button>
+                </div>
+            </div>
             <div id="modal-offer-list" class="offer-list"></div>
         </div>
         <div class="modal-section">
@@ -161,6 +180,21 @@
         <button class="modal-close" onclick="closeChangelog()">✕</button>
         <h3 class="modal-title">🆕 Notas de Atualização</h3>
         <div id="changelog-list" class="changelog-list"></div>
+    </div>
+</div>
+
+<!-- Feedback modal -->
+<div class="modal-overlay hidden" id="feedback-modal" onclick="closeFeedbackModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <button class="modal-close" onclick="closeFeedbackModal()">✕</button>
+        <h3 class="modal-title">💬 Enviar Feedback</h3>
+        <p class="modal-hint">Sugestões, bugs ou qualquer coisa que queira compartilhar!</p>
+        <div class="modal-section">
+            <textarea id="feedback-text" class="bulk-textarea" placeholder="Escreva aqui..." rows="5" maxlength="2000" oninput="updateFeedbackCount()"></textarea>
+            <p class="feedback-char-count"><span id="feedback-char-n">0</span>/2000</p>
+        </div>
+        <button class="btn-primary btn-block" onclick="submitFeedback()">Enviar</button>
     </div>
 </div>
 

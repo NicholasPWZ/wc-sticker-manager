@@ -95,6 +95,20 @@ button, a { touch-action: manipulation; }
 .btn-block { width: 100%; margin-top: 16px; padding: 12px; font-size: 16px; }
 .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 .modal-count-hint { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 10px; min-height: 16px; }
+.feedback-char-count { font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 4px; }
+.sidebar-footer { border-top: 1px solid var(--border); margin-top: 10px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.sidebar-footer-btn { background: none; border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; text-align: left; text-decoration: none; transition: all 0.15s; display: block; }
+.sidebar-footer-btn:hover { border-color: var(--primary); color: var(--primary); }
+.admin-link { color: var(--accent-dark); border-color: var(--accent); }
+.admin-link:hover { background: #e8f5e9; color: var(--accent-dark); }
+.admin-feedback-page { max-width: 700px; }
+.feedback-count { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+.feedback-entry-card { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 10px; }
+.feedback-entry-header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.feedback-entry-user { font-size: 13px; font-weight: 700; }
+.feedback-entry-username { font-weight: 400; color: var(--text-muted); font-size: 12px; }
+.feedback-entry-date { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.feedback-entry-msg { font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
 
 .btn-edit { background: rgba(255,255,255,0.14); color: white; border: 1.5px solid rgba(255,255,255,0.35); border-radius: 7px; padding: 5px 11px; font-size: 12px; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
 .btn-edit:hover, .btn-edit.active { background: rgba(255,255,255,0.26); border-color: white; }
@@ -249,7 +263,9 @@ button, a { touch-action: manipulation; }
 .trade-card.trade-past { opacity: 0.72; }
 .trade-header { display: flex; align-items: center; gap: 7px; font-size: 13px; margin-bottom: 8px; flex-wrap: wrap; }
 .trade-date { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+.trade-chip-sort { display: flex; gap: 4px; margin-bottom: 5px; }
 .trade-items { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 7px; }
+.trade-items-inner { display: flex; gap: 20px; flex-wrap: wrap; }
 .trade-col { display: flex; flex-direction: column; gap: 4px; }
 .trade-col-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
 .trade-chip { background: #e3f2fd; color: var(--blue); border-radius: 10px; padding: 2px 7px; font-size: 11px; font-weight: 700; display: inline-block; }
@@ -277,8 +293,14 @@ button, a { touch-action: manipulation; }
 .modal-hint { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5; }
 .modal-hint code { background: var(--bg); padding: 1px 5px; border-radius: 4px; font-family: monospace; }
 .modal-section { margin-bottom: 14px; }
-.modal-section label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; }
+.modal-section label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 0; }
 .label-hint { font-weight: 400; }
+.modal-label-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.modal-label-row label { flex: 1; }
+.modal-sort-controls { display: flex; gap: 3px; flex-shrink: 0; }
+.modal-sort-btn { background: none; border: 1.5px solid var(--border); border-radius: 12px; padding: 2px 7px; font-size: 10px; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+.modal-sort-btn:hover { border-color: var(--primary); color: var(--primary); }
+.modal-sort-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
 .trade-want-label { font-size: 14px; font-weight: 700; background: #e3f2fd; color: var(--blue); padding: 7px 11px; border-radius: 7px; }
 [data-theme="dark"] .trade-want-label { background: #1a2a3a; }
 .offer-list { display: flex; flex-wrap: wrap; gap: 5px; max-height: 180px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 8px; padding: 8px; background: var(--bg); }

@@ -1,5 +1,8 @@
 // ── Changelog ─────────────────────────────────────────────────────────────────
 const CHANGELOG = [
+    { id: 12, date: '03/06', text: 'Sistema de feedback: botão "Enviar Feedback" na sidebar para todos os usuários' },
+    { id: 11, date: '03/06', text: 'Figurinhas dentro das trocas (pendentes e passadas) agora têm ordenação por # ou ABC' },
+    { id: 10, date: '03/06', text: 'Modal de troca: ordenação das listas de querer e oferecer (⭐ sugeridos, ABC, #)' },
     { id: 9,  date: '03/06', text: 'Notas de atualização agora abrem neste popup versionado' },
     { id: 8,  date: '03/06', text: 'Ordenação em todas as listas de trocas (↑↓ data, A–Z nome, status)' },
     { id: 7,  date: '02/06', text: 'Trocas passadas: botão "Ver ▶" mostra o que foi trocado em cada troca' },
@@ -644,6 +647,7 @@ function openTradeModal(recipientId, country, number, qty, missingKeysOverride, 
     const wantLabel = document.getElementById('modal-want-label');
     const wantListEl = document.getElementById('modal-want-list');
 
+    const wantSortControls = document.getElementById('want-sort-controls');
     if (multiWantMode) {
         wantLabel.classList.add('hidden');
         wantListEl.classList.remove('hidden');
@@ -652,6 +656,8 @@ function openTradeModal(recipientId, country, number, qty, missingKeysOverride, 
             const key = `${c}|${n}`;
             const div = document.createElement('div');
             div.className = 'want-item';
+            div.dataset.prefix = shortName(c);
+            div.dataset.number = n;
             div.textContent = `${shortName(c)} #${n}`;
             div.onclick = () => {
                 div.classList.toggle('selected');
@@ -661,11 +667,15 @@ function openTradeModal(recipientId, country, number, qty, missingKeysOverride, 
             };
             wantListEl.appendChild(div);
         });
+        wantSortControls?.classList.remove('hidden');
+        resetSortBtn(wantSortControls, 'abc');
+        sortModalList('modal-want-list', 'abc', null);
     } else {
         wantListEl.classList.add('hidden');
         wantLabel.classList.remove('hidden');
         wantLabel.textContent = `${shortName(country)} #${number}${qty ? ' (disponível: ' + qty + ')' : ''}`;
         selectedWants.add(`${country}|${number}`);
+        wantSortControls?.classList.add('hidden');
     }
 
     document.getElementById('modal-note').value = '';
@@ -684,6 +694,9 @@ function openTradeModal(recipientId, country, number, qty, missingKeysOverride, 
             const div = document.createElement('div');
             div.className = 'offer-item' + (isSuggested ? ' suggested' : '');
             div.dataset.key = key;
+            div.dataset.prefix = shortName(item.country);
+            div.dataset.number = item.number;
+            div.dataset.suggested = isSuggested ? '1' : '0';
             div.textContent = `${shortName(item.country)} #${item.number} ×${item.quantity}`;
             div.title = isSuggested ? 'Eles precisam desta!' : '';
             div.onclick = () => {
@@ -698,10 +711,38 @@ function openTradeModal(recipientId, country, number, qty, missingKeysOverride, 
             }
             offerList.appendChild(div);
         });
+        const offerSortControls = document.getElementById('offer-sort-controls');
+        resetSortBtn(offerSortControls, 'suggested');
+        sortModalList('modal-offer-list', 'suggested', null);
     }
 
     updateSubmitBtn();
     document.getElementById('trade-modal').classList.remove('hidden');
+}
+
+function resetSortBtn(controls, mode) {
+    if (!controls) return;
+    controls.querySelectorAll('.modal-sort-btn').forEach(b => b.classList.remove('active'));
+    controls.querySelector(`.modal-sort-btn[data-mode="${mode}"]`)?.classList.add('active');
+}
+
+function sortModalList(listId, mode, btn) {
+    const container = document.getElementById(listId);
+    if (!container) return;
+    const items = [...container.querySelectorAll('.want-item, .offer-item')];
+    items.sort((a, b) => {
+        if (mode === 'num') return parseInt(a.dataset.number || 0) - parseInt(b.dataset.number || 0);
+        if (mode === 'suggested') {
+            const diff = (b.dataset.suggested === '1' ? 1 : 0) - (a.dataset.suggested === '1' ? 1 : 0);
+            return diff !== 0 ? diff : (a.dataset.prefix || '').localeCompare(b.dataset.prefix || '', 'pt-BR', { sensitivity: 'base' });
+        }
+        return (a.dataset.prefix || '').localeCompare(b.dataset.prefix || '', 'pt-BR', { sensitivity: 'base' });
+    });
+    items.forEach(el => container.appendChild(el));
+    if (btn) {
+        btn.closest('.modal-sort-controls').querySelectorAll('.modal-sort-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
 }
 
 function openTradeModalFromBtn(btn) {
@@ -960,6 +1001,22 @@ function togglePastTrades() {
     document.getElementById('past-trades-section')?.classList.toggle('hidden');
 }
 
+function sortTradeChips(tradeId, mode, btn) {
+    const container = document.getElementById(`trade-items-${tradeId}`);
+    if (!container) return;
+    container.querySelectorAll('.trade-col').forEach(col => {
+        const chips = [...col.querySelectorAll('.trade-chip')];
+        chips.sort((a, b) =>
+            mode === 'num'
+                ? parseInt(a.dataset.number || 0) - parseInt(b.dataset.number || 0)
+                : (a.dataset.prefix || '').localeCompare(b.dataset.prefix || '', 'pt-BR', { sensitivity: 'base' })
+        );
+        chips.forEach(c => col.appendChild(c));
+    });
+    btn.closest('.trade-chip-sort').querySelectorAll('.modal-sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
 function sortTrades(list, mode, btn) {
     const listId = { incoming: 'incoming-list', outgoing: 'outgoing-list', past: 'past-list' }[list];
     const container = document.getElementById(listId);
@@ -977,6 +1034,40 @@ function sortTrades(list, mode, btn) {
 
     document.querySelectorAll(`.sort-btn[data-list="${list}"]`).forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+}
+
+// ── Feedback modal ─────────────────────────────────────────────────────────────
+function openFeedbackModal() {
+    const ta = document.getElementById('feedback-text');
+    if (ta) { ta.value = ''; updateFeedbackCount(); }
+    document.getElementById('feedback-modal')?.classList.remove('hidden');
+}
+
+function closeFeedbackModal() {
+    document.getElementById('feedback-modal')?.classList.add('hidden');
+}
+
+function updateFeedbackCount() {
+    const ta = document.getElementById('feedback-text');
+    const n = document.getElementById('feedback-char-n');
+    if (ta && n) n.textContent = ta.value.length;
+}
+
+function submitFeedback() {
+    const msg = document.getElementById('feedback-text')?.value.trim();
+    if (!msg) { showToast('Escreva algo antes de enviar.'); return; }
+    fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg }),
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) { showToast(data.error); return; }
+            closeFeedbackModal();
+            showToast('Feedback enviado! Obrigado 🙏');
+        })
+        .catch(() => showToast('Erro ao enviar. Tente novamente.'));
 }
 
 // ── WebSocket ──────────────────────────────────────────────────────────────────

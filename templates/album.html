@@ -399,17 +399,23 @@
             <strong>{{ trade.requester.display_name }}</strong> quer trocar
             <span class="trade-date">{{ trade.created_at.strftime('%d/%m %H:%M') }}</span>
         </div>
-        <div class="trade-items">
+        <div class="trade-chip-sort">
+            <button class="modal-sort-btn active" data-mode="num" onclick="sortTradeChips({{ trade.id }},'num',this)">#</button>
+            <button class="modal-sort-btn" data-mode="abc" onclick="sortTradeChips({{ trade.id }},'abc',this)">ABC</button>
+        </div>
+        <div class="trade-items" id="trade-items-{{ trade.id }}">
             <div class="trade-col">
                 <span class="trade-col-title">Ele quer de você:</span>
                 {% for item in trade.items if item.direction == 'want' %}
-                <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                {% set short = item.country.split('(')[0].strip() if '(' in item.country else item.country %}
+                <span class="trade-chip" data-prefix="{{ short }}" data-number="{{ item.number }}">{{ short }} #{{ item.number }}</span>
                 {% endfor %}
             </div>
             <div class="trade-col">
                 <span class="trade-col-title">Ele oferece:</span>
                 {% for item in trade.items if item.direction == 'offer' %}
-                <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                {% set short = item.country.split('(')[0].strip() if '(' in item.country else item.country %}
+                <span class="trade-chip" data-prefix="{{ short }}" data-number="{{ item.number }}">{{ short }} #{{ item.number }}</span>
                 {% endfor %}
             </div>
         </div>
@@ -445,17 +451,23 @@
             Para <strong>{{ trade.recipient.display_name }}</strong>
             <span class="trade-date">{{ trade.created_at.strftime('%d/%m %H:%M') }}</span>
         </div>
-        <div class="trade-items">
+        <div class="trade-chip-sort">
+            <button class="modal-sort-btn active" data-mode="num" onclick="sortTradeChips({{ trade.id }},'num',this)">#</button>
+            <button class="modal-sort-btn" data-mode="abc" onclick="sortTradeChips({{ trade.id }},'abc',this)">ABC</button>
+        </div>
+        <div class="trade-items" id="trade-items-{{ trade.id }}">
             <div class="trade-col">
                 <span class="trade-col-title">Você quer:</span>
                 {% for item in trade.items if item.direction == 'want' %}
-                <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                {% set short = item.country.split('(')[0].strip() if '(' in item.country else item.country %}
+                <span class="trade-chip" data-prefix="{{ short }}" data-number="{{ item.number }}">{{ short }} #{{ item.number }}</span>
                 {% endfor %}
             </div>
             <div class="trade-col">
                 <span class="trade-col-title">Você oferece:</span>
                 {% for item in trade.items if item.direction == 'offer' %}
-                <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                {% set short = item.country.split('(')[0].strip() if '(' in item.country else item.country %}
+                <span class="trade-chip" data-prefix="{{ short }}" data-number="{{ item.number }}">{{ short }} #{{ item.number }}</span>
                 {% endfor %}
             </div>
         </div>
@@ -505,15 +517,22 @@
                 <button class="btn-ver-mais past-trade-toggle" onclick="toggleSection('past-items-{{ loop.index }}', this)">Ver ▶</button>
             </div>
             <div class="trade-items hidden" id="past-items-{{ loop.index }}">
+                <div class="trade-chip-sort">
+                    <button class="modal-sort-btn active" data-mode="num" onclick="sortTradeChips('past-{{ trade.id }}','num',this)">#</button>
+                    <button class="modal-sort-btn" data-mode="abc" onclick="sortTradeChips('past-{{ trade.id }}','abc',this)">ABC</button>
+                </div>
+                <div class="trade-items-inner" id="trade-items-past-{{ trade.id }}">
                 <div class="trade-col">
                     <span class="trade-col-title">{{ 'Você recebeu' if trade.is_completed else 'Queria' }}:</span>
                     {% if trade.requester_id == current_user.id %}
                         {% for item in trade.items if item.direction == 'want' %}
-                        <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                        {% set short = item.country.split('(')[0].strip() if '(' in item.country else item.country %}
+                        <span class="trade-chip" data-prefix="{{ short }}" data-number="{{ item.number }}">{{ short }} #{{ item.number }}</span>
                         {% endfor %}
                     {% else %}
                         {% for item in trade.items if item.direction == 'offer' %}
-                        <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                        {% set short = item.country.split('(')[0].strip() if '(' in item.country else item.country %}
+                        <span class="trade-chip" data-prefix="{{ short }}" data-number="{{ item.number }}">{{ short }} #{{ item.number }}</span>
                         {% endfor %}
                     {% endif %}
                 </div>
@@ -521,13 +540,16 @@
                     <span class="trade-col-title">{{ 'Você deu' if trade.is_completed else 'Oferecia' }}:</span>
                     {% if trade.requester_id == current_user.id %}
                         {% for item in trade.items if item.direction == 'offer' %}
-                        <span class="trade-chip muted">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                        {% set short = item.country.split('(')[0].strip() if '(' in item.country else item.country %}
+                        <span class="trade-chip muted" data-prefix="{{ short }}" data-number="{{ item.number }}">{{ short }} #{{ item.number }}</span>
                         {% endfor %}
                     {% else %}
                         {% for item in trade.items if item.direction == 'want' %}
-                        <span class="trade-chip muted">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                        {% set short = item.country.split('(')[0].strip() if '(' in item.country else item.country %}
+                        <span class="trade-chip muted" data-prefix="{{ short }}" data-number="{{ item.number }}">{{ short }} #{{ item.number }}</span>
                         {% endfor %}
                     {% endif %}
+                </div>
                 </div>
                 {% if trade.note %}<p class="trade-note">"{{ trade.note }}"</p>{% endif %}
             </div>
