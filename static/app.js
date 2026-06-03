@@ -1,34 +1,44 @@
-// ── Announcement notification ─────────────────────────────────────────────────
-const ANNOUNCE_KEY = 'announce_v2_dismissed';
-(function initAnnouncement() {
-    if (localStorage.getItem(ANNOUNCE_KEY)) return;
-    const list = document.getElementById('notif-list');
-    if (!list) return;
-    list.querySelector('.notif-empty')?.remove();
-    const el = document.createElement('div');
-    el.className = 'notif-announce';
-    el.id = 'notif-announce-item';
-    el.innerHTML = `
-        <button class="notif-dismiss" onclick="dismissAnnouncement()">✕</button>
-        🆕 <strong>Novidades:</strong><br>
-        · Edite seu <a href="/profile">perfil</a> (nome, foto, senha)<br>
-        · <strong>Matches de Troca</strong> agora mostram só quem tem o que você precisa
-    `;
-    list.prepend(el);
+// ── Changelog ─────────────────────────────────────────────────────────────────
+const CHANGELOG = [
+    { id: 9,  date: '03/06', text: 'Notas de atualização agora abrem neste popup versionado' },
+    { id: 8,  date: '03/06', text: 'Ordenação em todas as listas de trocas (↑↓ data, A–Z nome, status)' },
+    { id: 7,  date: '02/06', text: 'Trocas passadas: botão "Ver ▶" mostra o que foi trocado em cada troca' },
+    { id: 6,  date: '02/06', text: 'Validação: confirmar troca falha se figurinhas já foram usadas em outra negociação' },
+    { id: 5,  date: '02/06', text: 'Finalizar troca atualiza álbum e repetidas de ambos automaticamente' },
+    { id: 4,  date: '02/06', text: 'Trocas pendentes ficam visíveis mesmo após um lado já ter finalizado' },
+    { id: 3,  date: '01/06', text: 'Propor troca: selecione múltiplas figurinhas — quantidades iguais obrigatórias' },
+    { id: 2,  date: '01/06', text: 'Matches: escolha qualquer figurinha da lista ao propor troca, não só a primeira' },
+    { id: 1,  date: '01/06', text: 'Correção do tamanho do logo no cabeçalho' },
+];
+const CHANGELOG_KEY = 'changelog_seen';
+
+(function initChangelogBadge() {
+    const seen = parseInt(localStorage.getItem(CHANGELOG_KEY) || '0');
+    const unseen = CHANGELOG.filter(e => e.id > seen).length;
     const badge = document.getElementById('notif-badge');
-    if (badge) { badge.classList.remove('hidden'); badge.textContent = parseInt(badge.textContent || '0') + 1; }
+    if (!badge) return;
+    if (unseen > 0) {
+        badge.textContent = unseen;
+        badge.classList.remove('hidden');
+    }
 })();
 
-function dismissAnnouncement() {
-    localStorage.setItem(ANNOUNCE_KEY, '1');
-    const el = document.getElementById('notif-announce-item');
-    if (el) { el.remove(); }
+function openChangelog() {
+    const seen = parseInt(localStorage.getItem(CHANGELOG_KEY) || '0');
+    document.getElementById('changelog-list').innerHTML = CHANGELOG.map(e => `
+        <div class="changelog-entry${e.id > seen ? ' changelog-new' : ''}">
+            <span class="changelog-date">${e.date}</span>
+            <span class="changelog-text">${e.text}</span>
+        </div>
+    `).join('');
+    document.getElementById('changelog-modal').classList.remove('hidden');
+    localStorage.setItem(CHANGELOG_KEY, CHANGELOG[0].id);
     const badge = document.getElementById('notif-badge');
-    if (badge) {
-        const n = Math.max(0, parseInt(badge.textContent || '1') - 1);
-        badge.textContent = n;
-        if (n === 0) badge.classList.add('hidden');
-    }
+    if (badge) badge.classList.add('hidden');
+}
+
+function closeChangelog() {
+    document.getElementById('changelog-modal').classList.add('hidden');
 }
 
 // ── Sidebar drawer ────────────────────────────────────────────────────────────
@@ -950,21 +960,23 @@ function togglePastTrades() {
     document.getElementById('past-trades-section')?.classList.toggle('hidden');
 }
 
-// ── Notifications ──────────────────────────────────────────────────────────────
-function toggleNotifPanel() {
-    document.getElementById('notif-panel').classList.toggle('hidden');
-}
+function sortTrades(list, mode, btn) {
+    const listId = { incoming: 'incoming-list', outgoing: 'outgoing-list', past: 'past-list' }[list];
+    const container = document.getElementById(listId);
+    if (!container) return;
 
-function addNotification(message) {
-    const list = document.getElementById('notif-list');
-    list.querySelector('.notif-empty')?.remove();
-    const item = document.createElement('div');
-    item.className = 'notif-item';
-    item.textContent = message;
-    list.prepend(item);
-    const badge = document.getElementById('notif-badge');
-    badge.classList.remove('hidden');
-    badge.textContent = parseInt(badge.textContent || '0') + 1;
+    const cards = [...container.querySelectorAll('.trade-card')];
+    cards.sort((a, b) => {
+        if (mode === 'date-desc') return b.dataset.date.localeCompare(a.dataset.date);
+        if (mode === 'date-asc')  return a.dataset.date.localeCompare(b.dataset.date);
+        if (mode === 'name')      return (a.dataset.name || '').localeCompare(b.dataset.name || '', 'pt-BR', { sensitivity: 'base' });
+        if (mode === 'status')    return (a.dataset.status || '').localeCompare(b.dataset.status || '');
+        return 0;
+    });
+    cards.forEach(c => container.appendChild(c));
+
+    document.querySelectorAll(`.sort-btn[data-list="${list}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 }
 
 // ── WebSocket ──────────────────────────────────────────────────────────────────
@@ -975,15 +987,13 @@ function addNotification(message) {
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.type === 'trade_request') {
-            addNotification(`${data.from_user} quer trocar com você!`);
             showToast(data.message);
         } else if (data.type === 'trade_finalized') {
             if (data.completed) {
                 showToast(`Troca concluída com ${data.by_user}! 🎉`);
                 removeTrade(data.trade_id);
             } else {
-                addNotification(`${data.by_user} confirmou a troca. Confirme sua parte!`);
-                showToast(`${data.by_user} finalizou a troca. Sua vez!`);
+                showToast(`${data.by_user} finalizou a troca. Confirme sua parte!`);
             }
         }
     };
@@ -1000,10 +1010,3 @@ function showToast(msg) {
     toastTimer = setTimeout(() => el.classList.add('hidden'), 3500);
 }
 
-// Close notif panel on outside click
-document.addEventListener('click', e => {
-    const panel = document.getElementById('notif-panel');
-    const btn = document.getElementById('notif-btn');
-    if (panel && !panel.classList.contains('hidden') && !panel.contains(e.target) && btn && !btn.contains(e.target))
-        panel.classList.add('hidden');
-});

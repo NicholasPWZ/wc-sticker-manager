@@ -36,24 +36,10 @@
             <button class="icon-btn" id="theme-btn" onclick="toggleDarkMode()" title="Alternar tema">🌙</button>
 
             <div class="notif-wrapper">
-                <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()">
+                <button class="notif-btn" id="notif-btn" onclick="openChangelog()">
                     🔔
-                    {% if notif_count > 0 %}
-                    <span class="badge" id="notif-badge">{{ notif_count }}</span>
-                    {% else %}
-                    <span class="badge hidden" id="notif-badge">0</span>
-                    {% endif %}
+                    <span class="badge hidden" id="notif-badge"></span>
                 </button>
-                <div class="notif-panel hidden" id="notif-panel">
-                    <p class="notif-title">Notificações</p>
-                    <div id="notif-list">
-                        {% if notif_count == 0 %}
-                        <p class="notif-empty">Nenhuma notificação</p>
-                        {% else %}
-                        <p class="notif-empty">Você tem {{ notif_count }} troca(s) pendente(s).</p>
-                        {% endif %}
-                    </div>
-                </div>
             </div>
 
             <div class="user-chip">
@@ -165,6 +151,16 @@
             <button class="btn-secondary" onclick="previewBulk()">Pré-visualizar</button>
             <button class="btn-primary" onclick="submitBulk()">Confirmar</button>
         </div>
+    </div>
+</div>
+
+<!-- Changelog modal -->
+<div class="modal-overlay hidden" id="changelog-modal" onclick="closeChangelog()">
+    <div class="modal-box changelog-box" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <button class="modal-close" onclick="closeChangelog()">✕</button>
+        <h3 class="modal-title">🆕 Notas de Atualização</h3>
+        <div id="changelog-list" class="changelog-list"></div>
     </div>
 </div>
 

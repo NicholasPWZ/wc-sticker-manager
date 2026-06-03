@@ -382,9 +382,19 @@
     <h2 class="section-title">Trocas</h2>
 
     {% if incoming_trades %}
-    <h3 class="trades-subtitle">📥 Recebidos</h3>
+    <div class="trades-list-header">
+        <h3 class="trades-subtitle">📥 Recebidos</h3>
+        <div class="sort-controls trade-sort-controls">
+            <button class="sort-btn active" data-list="incoming" data-mode="date-desc" onclick="sortTrades('incoming','date-desc',this)">↓ Data</button>
+            <button class="sort-btn" data-list="incoming" data-mode="date-asc" onclick="sortTrades('incoming','date-asc',this)">↑ Data</button>
+            <button class="sort-btn" data-list="incoming" data-mode="name" onclick="sortTrades('incoming','name',this)">A–Z</button>
+        </div>
+    </div>
+    <div id="incoming-list">
     {% for trade in incoming_trades %}
-    <div class="trade-card" id="trade-{{ trade.id }}">
+    <div class="trade-card" id="trade-{{ trade.id }}"
+         data-date="{{ trade.created_at.strftime('%Y%m%d%H%M%S') }}"
+         data-name="{{ trade.requester.display_name }}">
         <div class="trade-header">
             <strong>{{ trade.requester.display_name }}</strong> quer trocar
             <span class="trade-date">{{ trade.created_at.strftime('%d/%m %H:%M') }}</span>
@@ -414,12 +424,23 @@
         </div>
     </div>
     {% endfor %}
+    </div>
     {% endif %}
 
     {% if outgoing_trades %}
-    <h3 class="trades-subtitle">📤 Enviados</h3>
+    <div class="trades-list-header">
+        <h3 class="trades-subtitle">📤 Enviados</h3>
+        <div class="sort-controls trade-sort-controls">
+            <button class="sort-btn active" data-list="outgoing" data-mode="date-desc" onclick="sortTrades('outgoing','date-desc',this)">↓ Data</button>
+            <button class="sort-btn" data-list="outgoing" data-mode="date-asc" onclick="sortTrades('outgoing','date-asc',this)">↑ Data</button>
+            <button class="sort-btn" data-list="outgoing" data-mode="name" onclick="sortTrades('outgoing','name',this)">A–Z</button>
+        </div>
+    </div>
+    <div id="outgoing-list">
     {% for trade in outgoing_trades %}
-    <div class="trade-card" id="trade-{{ trade.id }}">
+    <div class="trade-card" id="trade-{{ trade.id }}"
+         data-date="{{ trade.created_at.strftime('%Y%m%d%H%M%S') }}"
+         data-name="{{ trade.recipient.display_name }}">
         <div class="trade-header">
             Para <strong>{{ trade.recipient.display_name }}</strong>
             <span class="trade-date">{{ trade.created_at.strftime('%d/%m %H:%M') }}</span>
@@ -449,6 +470,7 @@
         </div>
     </div>
     {% endfor %}
+    </div>
     {% endif %}
 
     {% if not incoming_trades and not outgoing_trades %}
@@ -458,8 +480,21 @@
     <button class="btn-past-trades" onclick="togglePastTrades()">📋 Trocas Passadas</button>
     <div class="past-trades-section hidden" id="past-trades-section">
         {% if past_trades %}
+        <div class="trades-list-header">
+            <span></span>
+            <div class="sort-controls trade-sort-controls">
+                <button class="sort-btn active" data-list="past" data-mode="date-desc" onclick="sortTrades('past','date-desc',this)">↓ Data</button>
+                <button class="sort-btn" data-list="past" data-mode="date-asc" onclick="sortTrades('past','date-asc',this)">↑ Data</button>
+                <button class="sort-btn" data-list="past" data-mode="name" onclick="sortTrades('past','name',this)">A–Z</button>
+                <button class="sort-btn" data-list="past" data-mode="status" onclick="sortTrades('past','status',this)">✔ Status</button>
+            </div>
+        </div>
+        <div id="past-list">
         {% for trade in past_trades %}
-        <div class="trade-card trade-past">
+        <div class="trade-card trade-past"
+             data-date="{{ trade.created_at.strftime('%Y%m%d%H%M%S') }}"
+             data-name="{% if trade.requester_id == current_user.id %}{{ trade.recipient.display_name }}{% else %}{{ trade.requester.display_name }}{% endif %}"
+             data-status="{{ 'completed' if trade.is_completed else 'archived' }}">
             <div class="trade-header">
                 {% if trade.requester_id == current_user.id %}Com <strong>{{ trade.recipient.display_name }}</strong>
                 {% else %}Com <strong>{{ trade.requester.display_name }}</strong>{% endif %}
@@ -498,6 +533,7 @@
             </div>
         </div>
         {% endfor %}
+        </div>
         {% else %}
         <p class="trades-empty">Nenhuma troca passada.</p>
         {% endif %}
