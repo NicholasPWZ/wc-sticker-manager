@@ -467,6 +467,34 @@
                     {{ 'Concluída' if trade.is_completed else 'Cancelada' }}
                 </span>
                 <span class="trade-date">{{ trade.created_at.strftime('%d/%m/%Y') }}</span>
+                <button class="btn-ver-mais past-trade-toggle" onclick="toggleSection('past-items-{{ loop.index }}', this)">Ver ▶</button>
+            </div>
+            <div class="trade-items hidden" id="past-items-{{ loop.index }}">
+                <div class="trade-col">
+                    <span class="trade-col-title">{{ 'Você recebeu' if trade.is_completed else 'Queria' }}:</span>
+                    {% if trade.requester_id == current_user.id %}
+                        {% for item in trade.items if item.direction == 'want' %}
+                        <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                        {% endfor %}
+                    {% else %}
+                        {% for item in trade.items if item.direction == 'offer' %}
+                        <span class="trade-chip">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="trade-col">
+                    <span class="trade-col-title">{{ 'Você deu' if trade.is_completed else 'Oferecia' }}:</span>
+                    {% if trade.requester_id == current_user.id %}
+                        {% for item in trade.items if item.direction == 'offer' %}
+                        <span class="trade-chip muted">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                        {% endfor %}
+                    {% else %}
+                        {% for item in trade.items if item.direction == 'want' %}
+                        <span class="trade-chip muted">{{ item.country.split('(')[0].strip() if '(' in item.country else item.country }} #{{ item.number }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {% if trade.note %}<p class="trade-note">"{{ trade.note }}"</p>{% endif %}
             </div>
         </div>
         {% endfor %}

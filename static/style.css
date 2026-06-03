@@ -547,4 +547,5 @@ button, a { touch-action: manipulation; }
 /* ── Ver mais button ──────────────────────────────────────────────────────── */
 .btn-ver-mais { background: none; border: 1.5px solid var(--border); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
 .btn-ver-mais:hover { border-color: var(--primary); color: var(--primary); }
+.past-trade-toggle { margin-left: auto; }
 .user-avatar-sm-inline-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
