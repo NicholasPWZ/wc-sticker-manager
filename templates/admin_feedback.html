@@ -1,10 +1,26 @@
 {% extends "base.html" %}
 
-{% block title %}Feedback — Admin{% endblock %}
+{% block title %}Admin{% endblock %}
 
 {% block content %}
 <div class="admin-feedback-page">
-    <h2 class="section-title">💬 Feedback dos Usuários</h2>
+
+    <!-- ── Users ── -->
+    <h2 class="section-title">👥 Usuários</h2>
+    <div class="admin-users-list">
+        {% for u in all_users %}
+        <div class="admin-user-row">
+            <span class="admin-user-name">{{ u.display_name }} <span class="feedback-entry-username">@{{ u.username }}</span></span>
+            <div class="admin-pw-form">
+                <input class="admin-pw-input" type="password" placeholder="Nova senha…" id="pw-{{ u.id }}" minlength="4">
+                <button class="btn-secondary admin-pw-btn" onclick="setPassword({{ u.id }}, '{{ u.display_name | e }}')">Alterar</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- ── Feedback ── -->
+    <h2 class="section-title" style="margin-top:28px">💬 Feedback dos Usuários</h2>
     <p class="feedback-count">{{ feedbacks | length }} entrada(s)</p>
 
     {% if feedbacks %}
@@ -20,5 +36,29 @@
     {% else %}
     <p class="trades-empty">Nenhum feedback recebido ainda.</p>
     {% endif %}
+
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function setPassword(userId, displayName) {
+    const input = document.getElementById(`pw-${userId}`);
+    const password = input.value.trim();
+    if (!password) { showToast('Digite a nova senha.'); return; }
+    if (password.length < 4) { showToast('Senha muito curta (mín 4 caracteres).'); return; }
+    fetch('/admin/set-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, password }),
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) { showToast(data.error); return; }
+            input.value = '';
+            showToast(`Senha de ${displayName} alterada! ✔`);
+        })
+        .catch(() => showToast('Erro ao alterar senha.'));
+}
+</script>
 {% endblock %}
