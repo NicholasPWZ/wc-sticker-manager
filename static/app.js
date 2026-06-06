@@ -356,20 +356,24 @@ function toggleVerMais(id, btn) {
 
 // ── Sort & filter ──────────────────────────────────────────────────────────────
 function sortAlbum(mode) {
+    const sorter = (a, b) => {
+        if (mode === 'alpha')  return (a.dataset.sortName || '').localeCompare(b.dataset.sortName || '', 'pt-BR', { sensitivity: 'base' });
+        if (mode === 'prefix') return (a.dataset.prefix  || '').localeCompare(b.dataset.prefix  || '', 'en',    { sensitivity: 'base' });
+        return parseInt(a.dataset.index || 0) - parseInt(b.dataset.index || 0);
+    };
+
     const list = document.getElementById('album-list');
     const cards = Array.from(list.querySelectorAll('.country-card'));
-    if (mode === 'alpha') {
-        cards.sort((a, b) =>
-            a.dataset.sortName.localeCompare(b.dataset.sortName, 'pt-BR', { sensitivity: 'base' })
-        );
-    } else if (mode === 'prefix') {
-        cards.sort((a, b) =>
-            (a.dataset.prefix || '').localeCompare(b.dataset.prefix || '', 'en', { sensitivity: 'base' })
-        );
-    } else {
-        cards.sort((a, b) => parseInt(a.dataset.index) - parseInt(b.dataset.index));
-    }
+    cards.sort(sorter);
     cards.forEach(c => list.appendChild(c));
+
+    const missingList = document.querySelector('#missing-view .missing-list');
+    if (missingList) {
+        const rows = Array.from(missingList.querySelectorAll('.missing-row'));
+        rows.sort(sorter);
+        rows.forEach(r => missingList.appendChild(r));
+    }
+
     document.querySelectorAll('.sort-btn[data-mode]').forEach(b => b.classList.remove('active'));
     document.querySelector(`.sort-btn[data-mode="${mode}"]`)?.classList.add('active');
 }
@@ -405,6 +409,18 @@ function setView(view) {
 
     document.querySelectorAll('.sort-btn[data-view]').forEach(b => b.classList.remove('active'));
     document.querySelector(`.sort-btn[data-view="${view}"]`)?.classList.add('active');
+
+    const copyBtn = document.querySelector('.stats-row .copy-btn');
+    if (copyBtn) {
+        const map = {
+            cards:   { fn: copyOwnedList,   title: 'Copiar figurinhas que tenho' },
+            missing: { fn: copyMissingList,  title: 'Copiar figurinhas faltantes' },
+            trading: { fn: copyRepList,      title: 'Copiar repetidas' },
+        };
+        const cfg = map[view] || map.cards;
+        copyBtn.onclick = cfg.fn;
+        copyBtn.title = cfg.title;
+    }
 }
 
 function addRepetida() {

@@ -83,7 +83,7 @@
     {% if missing_by_country %}
     <div class="missing-list">
         {% for country in missing_by_country %}
-        <div class="missing-row" data-prefix="{{ country.prefix }}">
+        <div class="missing-row" data-prefix="{{ country.prefix }}" data-sort-name="{{ country.sort_name }}" data-index="{{ country.album_index }}">
             <span class="missing-country">
                 {% if country.code == 'fwc' %}<img class="flag-img-sm" src="https://digitalhub.fifa.com/transform/157d23bf-7e13-4d7b-949e-5d27d340987e/WC26_Logo?&io=transform:fill&quality=75" alt="WC26">
                 {% elif country.code == 'coca' %}🥤

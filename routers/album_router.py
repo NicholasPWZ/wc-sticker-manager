@@ -176,7 +176,14 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
         for c in sticker_data:
             missing = sorted(n for n in range(c["start"], c["start"] + c["count"]) if n not in c["owned"])
             if missing:
-                missing_by_country.append({"name": c["name"], "code": c["code"], "missing": missing})
+                missing_by_country.append({
+                    "name": c["name"],
+                    "code": c["code"],
+                    "prefix": c["prefix"],
+                    "sort_name": c["sort_name"],
+                    "album_index": c["album_index"],
+                    "missing": missing,
+                })
 
     # Matches (own album only)
     matches = compute_matches(current_user.id, db) if is_own else []
