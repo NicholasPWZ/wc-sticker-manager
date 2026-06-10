@@ -637,7 +637,8 @@ function clearAllRepetidas() {
         .catch(() => showToast('Erro ao remover.'));
 }
 
-function completeCountry(btn, country) {
+function completeCountry(btn) {
+    const country = btn.dataset.country;
     const card = btn.closest('.country-card');
     const wasUnowned = [...card.querySelectorAll('.sticker:not(.checked)')].map(s => parseInt(s.dataset.number));
 

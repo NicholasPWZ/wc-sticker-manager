@@ -184,7 +184,8 @@
             <span class="country-count" id="cnt-{{ loop.index }}">{{ country.owned_count }}/{{ country.count }}</span>
             {% if is_own_album and country.owned_count < country.count %}
             <button class="btn-complete-country"
-                    onclick="completeCountry(this, {{ country.name | tojson }}); event.stopPropagation()"
+                    data-country="{{ country.name | e }}"
+                    onclick="completeCountry(this); event.stopPropagation()"
                     title="Marcar todas como obtidas">✓ Completar</button>
             {% endif %}
             <button class="btn-repetidas" onclick="toggleRepetidas(this); event.stopPropagation()">
