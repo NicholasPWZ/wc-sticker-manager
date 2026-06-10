@@ -592,6 +592,10 @@ function toggleCountry(header) {
 function toggleRepetidas(btn) {
     const card = btn.closest('.country-card');
     const section = card.querySelector('.repetidas-section');
+    if (!section) {
+        toggleCountry(card.querySelector('.country-header'));
+        return;
+    }
     section.classList.toggle('hidden');
     btn.classList.toggle('open');
 }
@@ -608,8 +612,9 @@ function updateCountryCount(card) {
 }
 
 function updateRepCount(card) {
+    if (!card) return;
     let total = 0;
-    card.querySelectorAll('.rep-qty').forEach(el => { total += parseInt(el.textContent || '0'); });
+    card.querySelectorAll('.sticker-rep-qty').forEach(el => { total += parseInt(el.textContent || '0'); });
     const el = card.querySelector('.rep-count');
     if (el) el.textContent = `(${total})`;
 }
@@ -621,12 +626,9 @@ function clearAllRepetidas() {
         .then(data => {
             if (data.error) { showToast(data.error); return; }
             document.querySelectorAll('.rep-list-item').forEach(el => el.remove());
-            document.querySelectorAll('.rep-item').forEach(item => {
-                item.querySelector('.rep-qty').textContent = '0';
-                item.classList.remove('has-stock');
-                const card = item.closest('.country-card');
-                if (card) updateRepCount(card);
-            });
+            document.querySelectorAll('.sticker-rep-qty').forEach(el => { el.textContent = ''; });
+            document.querySelectorAll('.sticker-rep-minus').forEach(btn => { btn.disabled = true; });
+            document.querySelectorAll('.country-card').forEach(card => updateRepCount(card));
             const header = document.getElementById('rep-list-header');
             if (header) header.textContent = '0 figurinhas para trocar';
             updateGlobalStats();
@@ -635,11 +637,35 @@ function clearAllRepetidas() {
         .catch(() => showToast('Erro ao remover.'));
 }
 
+function completeCountry(btn, country) {
+    fetch('/api/country/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ country }),
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) { showToast(data.error); return; }
+            const card = btn.closest('.country-card');
+            card.querySelectorAll('.sticker:not(.checked)').forEach(s => {
+                s.classList.add('checked');
+                s.classList.remove('wished');
+                const minus = s.querySelector('.sticker-rep-minus');
+                if (minus) minus.disabled = false;
+            });
+            updateCountryCount(card);
+            updateGlobalStats();
+            btn.remove();
+            showToast('País completo! ✓');
+        })
+        .catch(() => showToast('Erro ao completar.'));
+}
+
 function updateGlobalStats() {
     const owned = document.querySelectorAll('.sticker.checked').length;
     const total = document.querySelectorAll('.sticker').length;
     let tradingTotal = 0;
-    document.querySelectorAll('.rep-qty').forEach(el => { tradingTotal += parseInt(el.textContent || '0'); });
+    document.querySelectorAll('.sticker-rep-qty').forEach(el => { tradingTotal += parseInt(el.textContent || '0'); });
 
     const pct = total > 0 ? (owned / total * 100).toFixed(1) : '0.0';
     const prob = owned < total ? (1 - Math.pow(owned / total, 7)) * 100 : 0;
@@ -671,11 +697,14 @@ function updateTrading(country, number, delta, btn) {
     })
         .then(r => r.json())
         .then(data => {
-            const repItem = btn.closest('.rep-item');
-            const qtyEl = repItem.querySelector('.rep-qty');
-            qtyEl.textContent = data.quantity;
-            repItem.classList.toggle('has-stock', data.quantity > 0);
-            updateRepCount(repItem.closest('.country-card'));
+            const sticker = btn.closest('.sticker');
+            if (sticker) {
+                const qtyEl = sticker.querySelector('.sticker-rep-qty');
+                if (qtyEl) qtyEl.textContent = data.quantity || '';
+                const minusBtn = sticker.querySelector('.sticker-rep-minus');
+                if (minusBtn) minusBtn.disabled = data.quantity === 0;
+            }
+            updateRepCount(btn.closest('.country-card'));
             updateGlobalStats();
         })
         .catch(() => showToast('Erro ao salvar.'));

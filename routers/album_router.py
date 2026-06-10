@@ -400,6 +400,31 @@ async def update_trading(request: Request, db: Session = Depends(get_db)):
     return JSONResponse({"quantity": 0})
 
 
+@router.post("/api/country/complete")
+async def complete_country(request: Request, db: Session = Depends(get_db)):
+    current_user = get_user_from_request(request, db)
+    if not current_user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    body = await request.json()
+    country = body.get("country")
+    if country not in STICKERS:
+        return JSONResponse({"error": "País não encontrado."}, status_code=404)
+    info = STICKERS[country]
+    start = info.get("start", 1)
+    nums = range(start, start + info["count"])
+    existing = {
+        s.number for s in db.query(AlbumSticker).filter(
+            AlbumSticker.user_id == current_user.id,
+            AlbumSticker.country == country,
+        ).all()
+    }
+    for n in nums:
+        if n not in existing:
+            db.add(AlbumSticker(user_id=current_user.id, country=country, number=n))
+    db.commit()
+    return JSONResponse({"ok": True})
+
+
 @router.post("/api/sticker/trade/clear-all")
 async def clear_all_trading(request: Request, db: Session = Depends(get_db)):
     current_user = get_user_from_request(request, db)

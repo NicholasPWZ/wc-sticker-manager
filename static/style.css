@@ -219,11 +219,23 @@ button, a { touch-action: manipulation; }
 .country-count { font-size: 11px; background: var(--bg); padding: 2px 7px; border-radius: 10px; font-weight: 700; color: var(--text-muted); }
 .btn-repetidas { background: none; border: 1.5px solid var(--border); border-radius: 5px; font-size: 11px; padding: 2px 7px; cursor: pointer; color: var(--text-muted); transition: all 0.15s; white-space: nowrap; }
 .btn-repetidas:hover, .btn-repetidas.open { background: #fff3e0; border-color: var(--orange); color: var(--orange); }
+.btn-complete-country { background: none; border: 1.5px solid var(--accent); border-radius: 5px; font-size: 11px; padding: 2px 7px; cursor: pointer; color: var(--accent-dark); font-weight: 700; transition: all 0.15s; white-space: nowrap; }
+.btn-complete-country:hover { background: var(--accent); color: white; }
+[data-theme="dark"] .btn-complete-country { color: var(--accent); }
 [data-theme="dark"] .btn-repetidas:hover, [data-theme="dark"] .btn-repetidas.open { background: #2a1f0a; }
 
 /* Sticker grid */
-.stickers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 5px; margin-top: 10px; }
-.sticker { display: flex; align-items: center; justify-content: center; height: 34px; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 6px; font-size: 12px; font-weight: 700; color: var(--text-muted); cursor: default; user-select: none; transition: all 0.15s; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.stickers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 5px; margin-top: 10px; }
+.sticker { display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 52px; padding: 5px 3px 4px; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 6px; cursor: default; user-select: none; transition: all 0.15s; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.sticker-num { font-size: 11px; font-weight: 700; color: var(--text-muted); line-height: 1; }
+.sticker.checked .sticker-num { color: white; }
+.sticker.wished .sticker-num { color: #b8860b; }
+.sticker-rep-bar { display: none; align-items: center; justify-content: center; gap: 2px; width: 100%; }
+.sticker.checked .sticker-rep-bar { display: flex; }
+.sticker-rep-btn { width: 14px; height: 14px; border: none; border-radius: 3px; font-size: 11px; font-weight: 800; line-height: 1; cursor: pointer; background: rgba(0,0,0,0.2); color: white; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.1s; }
+.sticker-rep-btn:hover:not(:disabled) { background: rgba(0,0,0,0.38); }
+.sticker-rep-btn:disabled { opacity: 0.3; cursor: default; }
+.sticker-rep-qty { font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.9); min-width: 10px; text-align: center; }
 .sticker.checked { background: var(--accent); color: white; border-color: var(--accent-dark); box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
 .sticker.wished { background: #fff8e1; border-color: #fbc02d; color: #f9a825; }
 .sticker.wished::after { content: '⭐'; position: absolute; top: -5px; right: -5px; font-size: 9px; }
@@ -425,8 +437,10 @@ button, a { touch-action: manipulation; }
     .sidebar-title { padding: 0; }
 
     /* Stickers — larger touch targets */
-    .stickers-grid { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; }
-    .sticker { height: 44px; font-size: 14px; border-radius: 8px; }
+    .stickers-grid { grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 6px; }
+    .sticker { height: 56px; border-radius: 8px; }
+    .sticker-num { font-size: 13px; }
+    .sticker-rep-btn { width: 16px; height: 16px; font-size: 12px; }
 
     /* Repetidas */
     .rep-grid { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; }
@@ -493,8 +507,8 @@ button, a { touch-action: manipulation; }
 
 /* Very small screens */
 @media (max-width: 360px) {
-    .stickers-grid { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); }
-    .sticker { height: 40px; }
+    .stickers-grid { grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); }
+    .sticker { height: 52px; }
     .chip { font-size: 10px; padding: 2px 6px; }
 }
 

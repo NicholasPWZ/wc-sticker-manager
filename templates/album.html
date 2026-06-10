@@ -182,6 +182,11 @@
                 <div class="country-mini-fill" style="width:{{ (country.owned_count / country.count * 100) | round(1) }}%"></div>
             </div>
             <span class="country-count" id="cnt-{{ loop.index }}">{{ country.owned_count }}/{{ country.count }}</span>
+            {% if is_own_album and country.owned_count < country.count %}
+            <button class="btn-complete-country"
+                    onclick="completeCountry(this, {{ country.name | tojson }}); event.stopPropagation()"
+                    title="Marcar todas como obtidas">✓ Completar</button>
+            {% endif %}
             <button class="btn-repetidas" onclick="toggleRepetidas(this); event.stopPropagation()">
                 🔄 <span class="rep-count">({{ country.trading_count }})</span>
             </button>
@@ -193,45 +198,47 @@
         {% for num in range(country.start, country.start + country.count) %}
         {% set is_owned = num in country.owned %}
         {% set is_wished = num in country.wishlist %}
+        {% set qty = country.trading.get(num, 0) %}
         <div class="sticker {% if is_owned %}checked{% elif is_wished %}wished{% endif %}"
              data-country="{{ country.name }}" data-number="{{ num }}"
-             onclick="handleStickerClick(this)">{{ num }}</div>
+             onclick="handleStickerClick(this)">
+            <span class="sticker-num">{{ num }}</span>
+            {% if is_own_album %}
+            <div class="sticker-rep-bar" onclick="event.stopPropagation()">
+                <button class="sticker-rep-btn sticker-rep-minus" onclick="updateTrading('{{ country.name }}', {{ num }}, -1, this)"{% if qty == 0 %} disabled{% endif %}>−</button>
+                <span class="sticker-rep-qty">{{ qty if qty else '' }}</span>
+                <button class="sticker-rep-btn sticker-rep-plus" onclick="updateTrading('{{ country.name }}', {{ num }}, 1, this)">+</button>
+            </div>
+            {% endif %}
+        </div>
         {% endfor %}
     </div>
 
-    <!-- Repetidas section -->
+    <!-- Repetidas section (other albums only — shows trade buttons) -->
+    {% if not is_own_album %}
     <div class="repetidas-section hidden">
-        <p class="rep-label">
-            {% if is_own_album %}+/− para registrar repetidas{% else %}Disponíveis para troca{% endif %}
-        </p>
+        <p class="rep-label">Disponíveis para troca</p>
         <div class="rep-grid">
             {% for num in range(country.start, country.start + country.count) %}
             {% set qty = country.trading.get(num, 0) %}
-            {% set i_need_item = (not is_own_album) and ((country.name ~ '|' ~ num) not in my_owned_keys) and qty > 0 %}
-            <div class="rep-item {% if qty > 0 %}has-stock{% endif %} {% if i_need_item %}i-need{% endif %}"
+            {% set i_need_item = ((country.name ~ '|' ~ num) not in my_owned_keys) and qty > 0 %}
+            {% if qty > 0 %}
+            <div class="rep-item has-stock {% if i_need_item %}i-need{% endif %}"
                  data-country="{{ country.name }}" data-number="{{ num }}">
                 <span class="rep-num">{{ num }}</span>
-                {% if is_own_album %}
-                <div class="rep-controls">
-                    <button class="rep-btn" onclick="updateTrading('{{ country.name }}', {{ num }}, -1, this)">−</button>
-                    <span class="rep-qty">{{ qty }}</span>
-                    <button class="rep-btn" onclick="updateTrading('{{ country.name }}', {{ num }}, 1, this)">+</button>
-                </div>
-                {% else %}
                 <div class="rep-controls">
                     <span class="rep-qty-view">{{ qty }}</span>
-                    {% if qty > 0 %}
                     <button class="btn-trade-sm {% if i_need_item %}btn-trade-need{% endif %}"
                             onclick="openTradeModal({{ album_owner.id }}, '{{ country.name }}', {{ num }}, {{ qty }})">🔄</button>
-                    {% endif %}
                 </div>
                 {% if i_need_item %}<span class="need-badge">falta</span>{% endif %}
                 {% if num in country.wishlist %}<span class="wish-badge">⭐ quer</span>{% endif %}
-                {% endif %}
             </div>
+            {% endif %}
             {% endfor %}
         </div>
     </div>
+    {% endif %}
 </div>
 {% endfor %}
 </div>
