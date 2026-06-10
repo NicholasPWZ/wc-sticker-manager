@@ -168,7 +168,15 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
     sticker_data = build_sticker_data(user_id, db)
     owned_count = sum(c["owned_count"] for c in sticker_data)
     trading_total = sum(c["trading_count"] for c in sticker_data)
-    probability = (1 - (owned_count / TOTAL_STICKERS) ** 7) * 100 if owned_count < TOTAL_STICKERS else 0.0
+    if owned_count >= TOTAL_STICKERS:
+        probability = 0.0
+    elif owned_count < 7:
+        probability = 100.0
+    else:
+        p_all_owned = 1.0
+        for i in range(7):
+            p_all_owned *= (owned_count - i) / (TOTAL_STICKERS - i)
+        probability = round((1 - p_all_owned) * 100, 1)
 
     # Missing list (own album only)
     missing_by_country = []

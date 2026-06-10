@@ -355,6 +355,18 @@ function toggleVerMais(id, btn) {
 }
 
 // ── Sort & filter ──────────────────────────────────────────────────────────────
+let currentView = 'cards';
+
+function sortCurrent(mode) {
+    if (currentView === 'trading') sortRepList(mode);
+    else sortAlbum(mode);
+}
+
+function setMainSortActive(mode) {
+    document.querySelectorAll('.sort-btn[data-scope="main"]').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.sort-btn[data-scope="main"][data-mode="${mode}"]`)?.classList.add('active');
+}
+
 function sortAlbum(mode) {
     const sorter = (a, b) => {
         if (mode === 'alpha')  return (a.dataset.sortName || '').localeCompare(b.dataset.sortName || '', 'pt-BR', { sensitivity: 'base' });
@@ -374,8 +386,7 @@ function sortAlbum(mode) {
         rows.forEach(r => missingList.appendChild(r));
     }
 
-    document.querySelectorAll('.sort-btn[data-mode]').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.sort-btn[data-mode="${mode}"]`)?.classList.add('active');
+    setMainSortActive(mode);
 }
 
 function filterAlbum(query) {
@@ -397,6 +408,7 @@ function clearSearch() {
 
 // ── View toggle (cards / missing) ──────────────────────────────────────────────
 function setView(view) {
+    currentView = view;
     const albumList   = document.getElementById('album-list');
     const missingView = document.getElementById('missing-view');
     const tradingView = document.getElementById('rep-list-view');
@@ -409,6 +421,9 @@ function setView(view) {
 
     document.querySelectorAll('.sort-btn[data-view]').forEach(b => b.classList.remove('active'));
     document.querySelector(`.sort-btn[data-view="${view}"]`)?.classList.add('active');
+
+    // Reset main sort buttons to appropriate default for this view
+    setMainSortActive(view === 'trading' ? 'prefix' : 'album');
 
     const copyBtn = document.querySelector('.stats-row .copy-btn');
     if (copyBtn) {
@@ -515,8 +530,7 @@ function sortRepList(mode) {
     });
 
     items.forEach(item => list.appendChild(item));
-    document.querySelectorAll('.rep-sort-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.rep-sort-btn[data-mode="${mode}"]`)?.classList.add('active');
+    setMainSortActive(mode);
 }
 
 function repListUpdate(country, number, delta, btn) {

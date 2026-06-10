@@ -20,9 +20,9 @@
         <h2>{% if is_own_album %}Meu Álbum{% else %}Álbum de {{ album_owner.display_name }}{% endif %}</h2>
         <div class="header-controls">
             <div class="sort-controls">
-                <button class="sort-btn active" data-mode="album" onclick="sortAlbum('album')">📋 Álbum</button>
-                <button class="sort-btn" data-mode="prefix" onclick="sortAlbum('prefix')">ABC</button>
-                <button class="sort-btn" data-mode="alpha" onclick="sortAlbum('alpha')">A–Z</button>
+                <button class="sort-btn active" data-mode="album" data-scope="main" onclick="sortCurrent('album')">📋 Álbum</button>
+                <button class="sort-btn" data-mode="prefix" data-scope="main" onclick="sortCurrent('prefix')">ABC</button>
+                <button class="sort-btn" data-mode="alpha" data-scope="main" onclick="sortCurrent('alpha')">A–Z</button>
             </div>
             {% if is_own_album %}
             <div class="view-controls">
@@ -112,11 +112,6 @@
             <p class="rep-list-header">{{ stats.trading }} figurina{{ 's' if stats.trading != 1 else '' }} para trocar</p>
             <button class="copy-btn" onclick="copyRepList()">📋 Copiar</button>
         </div>
-        <div class="sort-controls">
-            <button class="sort-btn rep-sort-btn active" data-mode="prefix" onclick="sortRepList('prefix')">ABC</button>
-            <button class="sort-btn rep-sort-btn" data-mode="album" onclick="sortRepList('album')">📋 Álbum</button>
-            <button class="sort-btn rep-sort-btn" data-mode="alpha" onclick="sortRepList('alpha')">A–Z</button>
-        </div>
     </div>
     <div class="rep-add-bar">
         <input type="text" id="rep-add-country" class="rep-add-code" placeholder="BRA"
@@ -169,7 +164,7 @@
 {% else %}
   {% set sort_name = country.name %}
 {% endif %}
-<div class="country-card" data-index="{{ loop.index0 }}" data-sort-name="{{ sort_name }}"
+<div class="country-card{% if country.owned_count == country.count %} country-complete{% endif %}" data-index="{{ loop.index0 }}" data-sort-name="{{ sort_name }}"
      data-prefix="{{ country.prefix }}"
      data-country-name="{{ country.name | lower }}" data-country-code="{{ country.prefix | lower }}">
 
