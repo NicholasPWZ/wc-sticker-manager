@@ -194,7 +194,13 @@ button, a { touch-action: manipulation; }
 .missing-view-title { font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 10px; }
 .missing-list { display: flex; flex-direction: column; gap: 6px; }
 .missing-row { display: flex; align-items: baseline; gap: 10px; background: var(--card-bg); border-radius: 8px; padding: 8px 12px; border: 1px solid var(--border); flex-wrap: wrap; }
+.missing-row.missing-complete { border-color: var(--accent); background: rgba(0,166,81,0.04); }
+[data-theme="dark"] .missing-row.missing-complete { background: rgba(0,200,96,0.04); }
 .missing-country { font-size: 13px; font-weight: 700; color: var(--primary); white-space: nowrap; display: flex; align-items: center; gap: 5px; min-width: 160px; }
+.missing-row.missing-complete .missing-country { color: var(--accent-dark); }
+[data-theme="dark"] .missing-row.missing-complete .missing-country { color: var(--accent); }
+.missing-complete-badge { font-size: 12px; font-weight: 700; color: var(--accent-dark); background: #e8f5e9; border-radius: 6px; padding: 2px 8px; white-space: nowrap; }
+[data-theme="dark"] .missing-complete-badge { background: #0d1f0f; color: var(--accent); }
 .flag-img-sm { width: 16px; height: auto; max-height: 16px; border-radius: 2px; }
 .missing-nums { font-size: 13px; color: var(--text-muted); flex: 1; }
 
@@ -208,7 +214,10 @@ button, a { touch-action: manipulation; }
 .country-header { display: flex; align-items: center; padding-bottom: 0; cursor: pointer; user-select: none; gap: 6px; }
 .country-header:hover { opacity: 0.85; }
 .country-chevron { font-size: 9px; color: var(--text-muted); flex-shrink: 0; }
-.country-name { font-weight: 700; font-size: 14px; color: var(--primary); display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+.country-name { font-weight: 700; font-size: 14px; color: var(--primary); display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow: hidden; }
+.country-name-abbr { display: none; }
+.country-name-long { display: flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.country-name-code { font-size: 11px; font-weight: 400; color: var(--text-muted); white-space: nowrap; }
 .flag-img { width: 20px; height: auto; max-height: 20px; border-radius: 2px; flex-shrink: 0; }
 .country-page { font-size: 10px; font-weight: 600; color: var(--text-muted); background: var(--bg); border-radius: 4px; padding: 1px 5px; margin-left: 2px; white-space: nowrap; }
 .flag-emoji { font-size: 18px; }
@@ -372,6 +381,29 @@ button, a { touch-action: manipulation; }
 .mode-option small { display: block; font-size: 11px; color: var(--text-muted); margin-top: 1px; }
 .bulk-textarea { width: 100%; height: 120px; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: monospace; resize: vertical; outline: none; background: var(--input-bg); color: var(--text); margin-top: 10px; }
 .bulk-textarea:focus { border-color: var(--primary); }
+
+/* ── Trade message modal ───────────────────────────────────────────────────── */
+.trade-msg-box { max-width: 720px; }
+.trade-msg-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px; }
+.trade-msg-section { display: flex; flex-direction: column; gap: 8px; }
+.trade-msg-section-hdr { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.trade-msg-section-title { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+.trade-msg-hdr-btns { display: flex; gap: 4px; }
+.trade-msg-list { max-height: 220px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 8px; padding: 8px; background: var(--bg); display: flex; flex-direction: column; gap: 8px; }
+.trade-msg-empty { font-size: 12px; color: var(--text-muted); }
+.trade-msg-group-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.trade-msg-group-name { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.trade-msg-tog { background: none; border: 1px solid var(--border); border-radius: 4px; font-size: 10px; padding: 1px 5px; cursor: pointer; color: var(--text-muted); transition: all 0.12s; }
+.trade-msg-tog:hover { border-color: var(--primary); color: var(--primary); }
+.trade-msg-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.trade-msg-chip { display: inline-flex; align-items: center; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 3px 7px; cursor: pointer; font-size: 11px; font-weight: 700; color: var(--text-muted); transition: all 0.12s; user-select: none; }
+.trade-msg-chip.selected { background: #e3f2fd; border-color: var(--blue); color: var(--blue); }
+[data-theme="dark"] .trade-msg-chip.selected { background: #1a2a3a; }
+.trade-msg-preview { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.trade-msg-preview-hdr { display: flex; align-items: center; justify-content: space-between; }
+.trade-msg-preview-hdr .btn-primary { padding: 6px 14px; font-size: 13px; margin-top: 0; }
+.trade-msg-output { width: 100%; height: 140px; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; font-family: inherit; resize: none; outline: none; background: var(--bg); color: var(--text); line-height: 1.5; }
+@media (max-width: 600px) { .trade-msg-sections { grid-template-columns: 1fr; } .trade-msg-list { max-height: 160px; } }
 .bulk-preview { margin-top: 10px; background: var(--bg); border-radius: 8px; padding: 10px 12px; font-size: 13px; max-height: 150px; overflow-y: auto; }
 .bulk-preview-row { padding: 2px 0; }
 .bulk-ok { color: var(--accent-dark); }
@@ -456,6 +488,14 @@ button, a { touch-action: manipulation; }
     .country-name { font-size: 13px; }
     .country-count { font-size: 11px; }
     .btn-repetidas { font-size: 11px; padding: 3px 8px; }
+    /* Closed state on mobile: show only 3-letter code */
+    .country-name-abbr { display: inline; }
+    .country-name-long { display: none; }
+    .country-card.open .country-name-abbr { display: none; }
+    .country-card.open .country-name-long { display: flex; }
+    /* Also hide mini-bar and complete button when closed */
+    .country-card:not(.open) .country-mini-bar { display: none; }
+    .country-card:not(.open) .btn-complete-country { display: none; }
 
     /* Stats chips */
     .stats-chips { gap: 4px; }

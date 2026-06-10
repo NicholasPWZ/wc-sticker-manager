@@ -586,6 +586,7 @@ function toggleCountry(header) {
     const chevron = header.querySelector('.country-chevron');
     const isOpen = !grid.classList.contains('hidden');
     grid.classList.toggle('hidden', isOpen);
+    card.classList.toggle('open', !isOpen);
     chevron.textContent = isOpen ? '▶' : '▼';
 }
 
@@ -1185,6 +1186,146 @@ function submitFeedback() {
             showToast('Feedback enviado! Obrigado 🙏');
         })
         .catch(() => showToast('Erro ao enviar. Tente novamente.'));
+}
+
+// ── Trade message ──────────────────────────────────────────────────────────────
+function openTradeMsgModal() {
+    const sn = c => c.includes('(') ? c.split('(')[0].trim() : c;
+
+    // Group MY_TRADING by country
+    const repGrouped = {};
+    (MY_TRADING || []).forEach(item => {
+        if (!repGrouped[item.country]) repGrouped[item.country] = [];
+        repGrouped[item.country].push({ number: item.number, qty: item.quantity });
+    });
+
+    // Group OWNER_MISSING_KEYS by country
+    const needGrouped = {};
+    (OWNER_MISSING_KEYS || new Set()).forEach(key => {
+        const idx = key.lastIndexOf('|');
+        const country = key.substring(0, idx);
+        const num = parseInt(key.substring(idx + 1));
+        if (!needGrouped[country]) needGrouped[country] = [];
+        needGrouped[country].push(num);
+    });
+
+    function renderSection(containerId, grouped, labelFn) {
+        const el = document.getElementById(containerId);
+        el.innerHTML = '';
+        const countries = Object.keys(grouped).sort((a, b) => sn(a).localeCompare(sn(b), 'pt-BR', { sensitivity: 'base' }));
+        if (!countries.length) {
+            el.innerHTML = '<span class="trade-msg-empty">Nenhum item.</span>';
+            return;
+        }
+        countries.forEach(country => {
+            const items = grouped[country].slice().sort((a, b) => (a.number ?? a) - (b.number ?? b));
+            const group = document.createElement('div');
+            group.className = 'trade-msg-group';
+            const hdr = document.createElement('div');
+            hdr.className = 'trade-msg-group-hdr';
+            hdr.innerHTML = `<span class="trade-msg-group-name">${sn(country)}</span>
+                <button class="trade-msg-tog" onclick="tradeMsgToggleCountry(this)">✓</button>`;
+            group.appendChild(hdr);
+            const chips = document.createElement('div');
+            chips.className = 'trade-msg-chips';
+            items.forEach(item => {
+                const num = item.number ?? item;
+                const qty = item.qty ?? 1;
+                const chip = document.createElement('span');
+                chip.className = 'trade-msg-chip selected';
+                chip.dataset.key = `${country}|${num}`;
+                chip.dataset.qty = qty;
+                chip.textContent = labelFn(num, qty);
+                chip.onclick = () => chip.classList.toggle('selected');
+                chips.appendChild(chip);
+            });
+            group.appendChild(chips);
+            el.appendChild(group);
+        });
+    }
+
+    renderSection('trade-msg-rep-list',  repGrouped,  (n, q) => q > 1 ? `#${n} ×${q}` : `#${n}`);
+    renderSection('trade-msg-need-list', needGrouped, (n)    => `#${n}`);
+
+    document.getElementById('trade-msg-output').value = '';
+    document.getElementById('trade-msg-modal').classList.remove('hidden');
+}
+
+function closeTradeMsgModal() {
+    document.getElementById('trade-msg-modal').classList.add('hidden');
+}
+
+function tradeMsgSelectAll(section) {
+    const id = section === 'rep' ? 'trade-msg-rep-list' : 'trade-msg-need-list';
+    document.querySelectorAll(`#${id} .trade-msg-chip`).forEach(c => c.classList.add('selected'));
+}
+
+function tradeMsgSelectNone(section) {
+    const id = section === 'rep' ? 'trade-msg-rep-list' : 'trade-msg-need-list';
+    document.querySelectorAll(`#${id} .trade-msg-chip`).forEach(c => c.classList.remove('selected'));
+}
+
+function tradeMsgToggleCountry(btn) {
+    const chips = btn.closest('.trade-msg-group').querySelectorAll('.trade-msg-chip');
+    const allSelected = [...chips].every(c => c.classList.contains('selected'));
+    chips.forEach(c => c.classList.toggle('selected', !allSelected));
+}
+
+function generateTradeMsg() {
+    const sn = c => c.includes('(') ? c.split('(')[0].trim() : c;
+
+    function collect(listId, withQty) {
+        const grouped = {};
+        document.querySelectorAll(`#${listId} .trade-msg-chip.selected`).forEach(chip => {
+            const idx = chip.dataset.key.lastIndexOf('|');
+            const country = chip.dataset.key.substring(0, idx);
+            const num = parseInt(chip.dataset.key.substring(idx + 1));
+            const qty = parseInt(chip.dataset.qty || '1');
+            if (!grouped[country]) grouped[country] = [];
+            grouped[country].push({ num, qty });
+        });
+        return grouped;
+    }
+
+    const rep  = collect('trade-msg-rep-list',  true);
+    const need = collect('trade-msg-need-list', false);
+
+    if (!Object.keys(rep).length && !Object.keys(need).length) {
+        showToast('Selecione pelo menos um item.');
+        return;
+    }
+
+    const lines = ['🔄 *Troca de figurinhas - Copa do Mundo 2026*', ''];
+
+    if (Object.keys(rep).length) {
+        lines.push('📦 *Tenho para trocar:*');
+        Object.entries(rep).sort(([a],[b]) => sn(a).localeCompare(sn(b), 'pt-BR', { sensitivity: 'base' }))
+            .forEach(([country, items]) => {
+                const nums = items.sort((a,b)=>a.num-b.num)
+                    .map(i => i.qty > 1 ? `#${i.num} (×${i.qty})` : `#${i.num}`).join(', ');
+                lines.push(`• ${sn(country)}: ${nums}`);
+            });
+        lines.push('');
+    }
+
+    if (Object.keys(need).length) {
+        lines.push('🔍 *Preciso:*');
+        Object.entries(need).sort(([a],[b]) => sn(a).localeCompare(sn(b), 'pt-BR', { sensitivity: 'base' }))
+            .forEach(([country, items]) => {
+                const nums = items.sort((a,b)=>a.num-b.num).map(i => `#${i.num}`).join(', ');
+                lines.push(`• ${sn(country)}: ${nums}`);
+            });
+        lines.push('');
+    }
+
+    lines.push('📲 Me chame para combinarmos! 😊');
+    document.getElementById('trade-msg-output').value = lines.join('\n');
+}
+
+function copyTradeMsg() {
+    const text = document.getElementById('trade-msg-output').value;
+    if (!text) { showToast('Gere a mensagem primeiro.'); return; }
+    navigator.clipboard.writeText(text).then(() => showToast('Mensagem copiada! ✔'));
 }
 
 // ── WebSocket ──────────────────────────────────────────────────────────────────

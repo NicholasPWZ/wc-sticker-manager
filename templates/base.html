@@ -198,6 +198,45 @@
     </div>
 </div>
 
+<!-- Trade message modal -->
+<div class="modal-overlay hidden" id="trade-msg-modal" onclick="closeTradeMsgModal()">
+    <div class="modal-box trade-msg-box" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <button class="modal-close" onclick="closeTradeMsgModal()">✕</button>
+        <h3 class="modal-title">📤 Mensagem de Troca</h3>
+        <div class="trade-msg-sections">
+            <div class="trade-msg-section">
+                <div class="trade-msg-section-hdr">
+                    <span class="trade-msg-section-title">📦 Tenho para trocar</span>
+                    <div class="trade-msg-hdr-btns">
+                        <button class="modal-sort-btn" onclick="tradeMsgSelectAll('rep')">Todos</button>
+                        <button class="modal-sort-btn" onclick="tradeMsgSelectNone('rep')">Nenhum</button>
+                    </div>
+                </div>
+                <div id="trade-msg-rep-list" class="trade-msg-list"></div>
+            </div>
+            <div class="trade-msg-section">
+                <div class="trade-msg-section-hdr">
+                    <span class="trade-msg-section-title">🔍 Preciso</span>
+                    <div class="trade-msg-hdr-btns">
+                        <button class="modal-sort-btn" onclick="tradeMsgSelectAll('need')">Todos</button>
+                        <button class="modal-sort-btn" onclick="tradeMsgSelectNone('need')">Nenhum</button>
+                    </div>
+                </div>
+                <div id="trade-msg-need-list" class="trade-msg-list"></div>
+            </div>
+        </div>
+        <div class="trade-msg-preview">
+            <div class="trade-msg-preview-hdr">
+                <span class="trade-msg-section-title">💬 Mensagem</span>
+                <button class="btn-primary" onclick="generateTradeMsg()">Gerar</button>
+            </div>
+            <textarea id="trade-msg-output" class="trade-msg-output" readonly placeholder="Clique em Gerar para criar a mensagem…"></textarea>
+            <button class="btn-primary btn-block" onclick="copyTradeMsg()">📋 Copiar para área de transferência</button>
+        </div>
+    </div>
+</div>
+
 <div class="toast hidden" id="toast">
     <span id="toast-msg"></span>
     <button class="toast-undo hidden" id="toast-undo">Desfazer</button>

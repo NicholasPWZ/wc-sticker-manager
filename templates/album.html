@@ -76,23 +76,24 @@
         <h3 class="missing-view-title" style="margin:0">🔍 Faltam {{ stats.total - stats.owned }} figurinhas</h3>
         <button class="copy-btn" onclick="copyMissingList()">📋 Copiar</button>
     </div>
-    {% if missing_by_country %}
     <div class="missing-list">
         {% for country in missing_by_country %}
-        <div class="missing-row" data-prefix="{{ country.prefix }}" data-sort-name="{{ country.sort_name }}" data-index="{{ country.album_index }}">
+        <div class="missing-row{% if country.complete %} missing-complete{% endif %}"
+             data-prefix="{{ country.prefix }}" data-sort-name="{{ country.sort_name }}" data-index="{{ country.album_index }}">
             <span class="missing-country">
                 {% if country.code == 'fwc' %}<img class="flag-img-sm" src="https://digitalhub.fifa.com/transform/157d23bf-7e13-4d7b-949e-5d27d340987e/WC26_Logo?&io=transform:fill&quality=75" alt="WC26">
                 {% elif country.code == 'coca' %}🥤
                 {% else %}<img class="flag-img-sm" src="https://flagcdn.com/w20/{{ country.code }}.png" alt="">{% endif %}
                 {{ country.name }}
             </span>
+            {% if country.complete %}
+            <span class="missing-complete-badge">✓ Completo</span>
+            {% else %}
             <span class="missing-nums">{{ country.missing | join(', ') }}</span>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
-    {% else %}
-    <p class="trades-empty">🎉 Álbum completo!</p>
-    {% endif %}
 </div>
 {% endif %}
 
@@ -174,8 +175,17 @@
             {% if country.code == 'fwc' %}<img class="flag-img" src="https://digitalhub.fifa.com/transform/157d23bf-7e13-4d7b-949e-5d27d340987e/WC26_Logo?&io=transform:fill&quality=75" alt="WC26">
             {% elif country.code == 'coca' %}<span class="flag-emoji">🥤</span>
             {% else %}<img class="flag-img" src="https://flagcdn.com/w40/{{ country.code }}.png" alt="">{% endif %}
-            {{ country.name }}
-            {% if country.page %}<span class="country-page">Pág. {{ country.page }}</span>{% endif %}
+            {%- if '(' in country.name %}
+            {%- set abbr = country.name.split('(')[1].rstrip(')') %}
+            {%- else %}
+            {%- set abbr = country.prefix %}
+            {%- endif %}
+            <span class="country-name-abbr">{{ abbr }}</span>
+            <span class="country-name-long">
+                {{ country.prefix }}
+                {% if '(' in country.name %}<span class="country-name-code">({{ abbr }})</span>{% endif %}
+                {% if country.page %}<span class="country-page">Pág. {{ country.page }}</span>{% endif %}
+            </span>
         </span>
         <div class="country-meta">
             <div class="country-mini-bar">
@@ -578,6 +588,7 @@
     <p class="sidebar-actions-title">Ações</p>
     <button class="sidebar-action-btn" id="sidebar-wish-btn" onclick="toggleWishlistMode(); closeSidebar()">⭐ Lista de Desejos</button>
     <button class="sidebar-action-btn" onclick="openBulkModal(); closeSidebar()">📋 Entrada em Massa</button>
+    <button class="sidebar-action-btn" onclick="openTradeMsgModal(); closeSidebar()">📤 Mensagem de Troca</button>
 </div>
 {% endif %}
 {% endblock %}
