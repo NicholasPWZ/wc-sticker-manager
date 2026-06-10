@@ -198,7 +198,10 @@
     </div>
 </div>
 
-<div class="toast hidden" id="toast"></div>
+<div class="toast hidden" id="toast">
+    <span id="toast-msg"></span>
+    <button class="toast-undo hidden" id="toast-undo">Desfazer</button>
+</div>
 
 <script>
     const CURRENT_USER_ID = {{ current_user.id }};

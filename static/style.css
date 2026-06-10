@@ -379,7 +379,9 @@ button, a { touch-action: manipulation; }
 .bulk-err { color: #f44336; }
 
 /* ── Toast ────────────────────────────────────────────────────────────────── */
-.toast { position: fixed; bottom: 24px; right: 24px; background: #323232; color: white; padding: 11px 18px; border-radius: 8px; font-size: 13px; z-index: 600; box-shadow: 0 4px 14px rgba(0,0,0,0.3); animation: slideIn 0.25s ease; max-width: calc(100vw - 48px); }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #323232; color: white; padding: 11px 18px; border-radius: 8px; font-size: 13px; z-index: 600; box-shadow: 0 4px 14px rgba(0,0,0,0.3); animation: slideIn 0.25s ease; max-width: calc(100vw - 48px); display: flex; align-items: center; gap: 10px; }
+.toast-undo { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.4); border-radius: 5px; color: white; font-size: 12px; font-weight: 700; padding: 3px 9px; cursor: pointer; white-space: nowrap; transition: background 0.15s; flex-shrink: 0; }
+.toast-undo:hover { background: rgba(255,255,255,0.3); }
 [data-theme="dark"] .toast { background: #3a3f4a; }
 @keyframes slideIn { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 

@@ -425,6 +425,24 @@ async def complete_country(request: Request, db: Session = Depends(get_db)):
     return JSONResponse({"ok": True})
 
 
+@router.post("/api/country/uncomplete")
+async def uncomplete_country(request: Request, db: Session = Depends(get_db)):
+    current_user = get_user_from_request(request, db)
+    if not current_user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    body = await request.json()
+    country = body.get("country")
+    numbers = body.get("numbers", [])
+    if numbers:
+        db.query(AlbumSticker).filter(
+            AlbumSticker.user_id == current_user.id,
+            AlbumSticker.country == country,
+            AlbumSticker.number.in_(numbers),
+        ).delete(synchronize_session=False)
+        db.commit()
+    return JSONResponse({"ok": True})
+
+
 @router.post("/api/sticker/trade/clear-all")
 async def clear_all_trading(request: Request, db: Session = Depends(get_db)):
     current_user = get_user_from_request(request, db)

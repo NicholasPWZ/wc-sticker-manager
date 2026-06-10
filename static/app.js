@@ -638,6 +638,9 @@ function clearAllRepetidas() {
 }
 
 function completeCountry(btn, country) {
+    const card = btn.closest('.country-card');
+    const wasUnowned = [...card.querySelectorAll('.sticker:not(.checked)')].map(s => parseInt(s.dataset.number));
+
     fetch('/api/country/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -646,7 +649,6 @@ function completeCountry(btn, country) {
         .then(r => r.json())
         .then(data => {
             if (data.error) { showToast(data.error); return; }
-            const card = btn.closest('.country-card');
             card.querySelectorAll('.sticker:not(.checked)').forEach(s => {
                 s.classList.add('checked');
                 s.classList.remove('wished');
@@ -655,8 +657,27 @@ function completeCountry(btn, country) {
             });
             updateCountryCount(card);
             updateGlobalStats();
-            btn.remove();
-            showToast('País completo! ✓');
+            btn.classList.add('hidden');
+            showToastWithUndo('País completo! ✓', () => {
+                fetch('/api/country/uncomplete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ country, numbers: wasUnowned }),
+                })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.error) { showToast(d.error); return; }
+                        wasUnowned.forEach(num => {
+                            const s = card.querySelector(`.sticker[data-number="${num}"]`);
+                            if (s) s.classList.remove('checked');
+                        });
+                        updateCountryCount(card);
+                        updateGlobalStats();
+                        btn.classList.remove('hidden');
+                        showToast('Ação desfeita.');
+                    })
+                    .catch(() => showToast('Erro ao desfazer.'));
+            });
         })
         .catch(() => showToast('Erro ao completar.'));
 }
@@ -1190,9 +1211,34 @@ function submitFeedback() {
 let toastTimer;
 function showToast(msg) {
     const el = document.getElementById('toast');
-    el.textContent = msg;
+    const msgEl = document.getElementById('toast-msg');
+    const undoBtn = document.getElementById('toast-undo');
+    if (msgEl) msgEl.textContent = msg; else el.textContent = msg;
+    if (undoBtn) undoBtn.classList.add('hidden');
     el.classList.remove('hidden');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.add('hidden'), 3500);
+}
+
+function showToastWithUndo(msg, undoFn, duration = 6000) {
+    const el = document.getElementById('toast');
+    const msgEl = document.getElementById('toast-msg');
+    const undoBtn = document.getElementById('toast-undo');
+    if (msgEl) msgEl.textContent = msg;
+    if (undoBtn) {
+        undoBtn.classList.remove('hidden');
+        undoBtn.onclick = () => {
+            clearTimeout(toastTimer);
+            el.classList.add('hidden');
+            undoBtn.classList.add('hidden');
+            undoFn();
+        };
+    }
+    el.classList.remove('hidden');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        el.classList.add('hidden');
+        if (undoBtn) undoBtn.classList.add('hidden');
+    }, duration);
 }
 
