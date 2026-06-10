@@ -3,12 +3,7 @@
 {% block title %}Álbum de {{ album_owner.display_name }}{% endblock %}
 
 {% block header_actions %}
-{% if is_own_album %}
-<div class="header-edit-group">
-    <button class="btn-edit" id="wish-btn" onclick="toggleWishlistMode()">⭐ Desejos</button>
-    <button class="btn-edit" onclick="openBulkModal()">📋 Entrada</button>
-</div>
-{% else %}
+{% if not is_own_album %}
 <span class="viewing-label">Álbum de <strong>{{ album_owner.display_name }}</strong></span>
 {% endif %}
 {% endblock %}
