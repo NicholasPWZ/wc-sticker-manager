@@ -541,8 +541,8 @@ button, a { touch-action: manipulation; }
     .album-title-row { flex-direction: column; align-items: flex-start; gap: 6px; }
     .album-title-row h2 { font-size: 16px; }
     .header-controls { width: 100%; justify-content: space-between; }
-    .sort-controls, .view-controls { flex: 1; }
-    .sort-controls .sort-btn, .view-controls .sort-btn { flex: 1; text-align: center; font-size: 11px; padding: 5px 4px; }
+    .sort-controls, .view-controls { flex: 1; min-width: 0; }
+    .sort-controls .sort-btn, .view-controls .sort-btn { flex: 1; min-width: 0; text-align: center; font-size: 10px; padding: 5px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .stats-chips { gap: 4px; }
     .chip { font-size: 10px; padding: 3px 7px; }
 }

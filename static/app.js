@@ -1199,12 +1199,12 @@ function openTradeMsgModal() {
         repGrouped[item.country].push({ number: item.number, qty: item.quantity });
     });
 
-    // Group OWNER_MISSING_KEYS by country
+    // Build "Preciso" from unowned stickers in the DOM
     const needGrouped = {};
-    (OWNER_MISSING_KEYS || new Set()).forEach(key => {
-        const idx = key.lastIndexOf('|');
-        const country = key.substring(0, idx);
-        const num = parseInt(key.substring(idx + 1));
+    document.querySelectorAll('.sticker:not(.checked)').forEach(s => {
+        const country = s.dataset.country;
+        const num = parseInt(s.dataset.number);
+        if (!country || isNaN(num)) return;
         if (!needGrouped[country]) needGrouped[country] = [];
         needGrouped[country].push(num);
     });
