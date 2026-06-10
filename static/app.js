@@ -268,7 +268,7 @@ function toggleWishlistItem(el) {
 }
 
 // ── Wishlist remove (called from section ✕ button) ───────────────────────────
-function removeWishlist(country, number, btn) {
+function removeWishlist(country, number, _btn) {
     fetch('/api/wishlist/toggle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -397,6 +397,11 @@ function filterAlbum(query) {
         const code = card.dataset.countryCode || '';
         card.classList.toggle('hidden-card', q !== '' && !name.includes(q) && !code.includes(q));
     });
+    document.querySelectorAll('.missing-row').forEach(row => {
+        const prefix = (row.dataset.prefix || '').toLowerCase();
+        const name = (row.dataset.sortName || '').toLowerCase();
+        row.classList.toggle('hidden-card', q !== '' && !prefix.includes(q) && !name.includes(q));
+    });
 }
 
 function clearSearch() {
@@ -417,7 +422,10 @@ function setView(view) {
     albumList.classList.toggle('hidden',   view !== 'cards');
     missingView?.classList.toggle('hidden', view !== 'missing');
     tradingView?.classList.toggle('hidden', view !== 'trading');
-    searchBar?.classList.toggle('hidden',   view !== 'cards');
+    searchBar?.classList.toggle('hidden',   view === 'trading');
+
+    const qtyBtn = document.querySelector('.sort-btn[data-mode="qty"]');
+    if (qtyBtn) qtyBtn.classList.toggle('hidden', view !== 'trading');
 
     document.querySelectorAll('.sort-btn[data-view]').forEach(b => b.classList.remove('active'));
     document.querySelector(`.sort-btn[data-view="${view}"]`)?.classList.add('active');
@@ -459,6 +467,7 @@ function addRepetida() {
             );
             if (existing) {
                 existing.querySelector('.rep-list-qty').textContent = data.quantity;
+                existing.dataset.qty = data.quantity;
             } else {
                 // Build new item from country card data
                 const card = document.querySelector(
@@ -475,7 +484,7 @@ function addRepetida() {
                 const safeCountry = country.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                 const item = document.createElement('div');
                 item.className = 'rep-list-item';
-                Object.assign(item.dataset, { country, number, prefix, sortName, albumIndex });
+                Object.assign(item.dataset, { country, number, prefix, sortName, albumIndex, qty: data.quantity });
                 item.innerHTML = `
                     <div class="rep-list-flag">${flagHtml}</div>
                     <div class="rep-list-label">
@@ -523,6 +532,8 @@ function sortRepList(mode) {
             diff = parseInt(a.dataset.albumIndex) - parseInt(b.dataset.albumIndex);
         } else if (mode === 'alpha') {
             diff = (a.dataset.sortName || '').localeCompare(b.dataset.sortName || '', 'pt-BR', { sensitivity: 'base' });
+        } else if (mode === 'qty') {
+            diff = parseInt(b.dataset.qty || '0') - parseInt(a.dataset.qty || '0');
         } else {
             diff = (a.dataset.prefix || '').localeCompare(b.dataset.prefix || '', 'en', { sensitivity: 'base' });
         }
@@ -544,6 +555,7 @@ function repListUpdate(country, number, delta, btn) {
             const item = btn.closest('.rep-list-item');
             const qtyEl = item.querySelector('.rep-list-qty');
             qtyEl.textContent = data.quantity;
+            item.dataset.qty = data.quantity;
 
             if (data.quantity === 0) {
                 item.style.transition = 'opacity 0.3s';
@@ -590,6 +602,9 @@ function updateCountryCount(card) {
     const total = card.querySelectorAll('.sticker').length;
     const el = card.querySelector('.country-count');
     if (el) el.textContent = `${checked}/${total}`;
+    const fill = card.querySelector('.country-mini-fill');
+    if (fill && total > 0) fill.style.width = `${Math.round(checked / total * 100)}%`;
+    card.classList.toggle('country-complete', total > 0 && checked === total);
 }
 
 function updateRepCount(card) {
@@ -597,6 +612,27 @@ function updateRepCount(card) {
     card.querySelectorAll('.rep-qty').forEach(el => { total += parseInt(el.textContent || '0'); });
     const el = card.querySelector('.rep-count');
     if (el) el.textContent = `(${total})`;
+}
+
+function clearAllRepetidas() {
+    if (!confirm('Remover TODAS as repetidas? Esta ação não pode ser desfeita.')) return;
+    fetch('/api/sticker/trade/clear-all', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) { showToast(data.error); return; }
+            document.querySelectorAll('.rep-list-item').forEach(el => el.remove());
+            document.querySelectorAll('.rep-item').forEach(item => {
+                item.querySelector('.rep-qty').textContent = '0';
+                item.classList.remove('has-stock');
+                const card = item.closest('.country-card');
+                if (card) updateRepCount(card);
+            });
+            const header = document.getElementById('rep-list-header');
+            if (header) header.textContent = '0 figurinhas para trocar';
+            updateGlobalStats();
+            showToast('Todas as repetidas removidas.');
+        })
+        .catch(() => showToast('Erro ao remover.'));
 }
 
 function updateGlobalStats() {
@@ -939,7 +975,7 @@ function getStickerCount(country) {
 }
 
 function submitBulk() {
-    const { entries, errors } = parseBulkInput();
+    const { entries } = parseBulkInput();
     if (!entries.length) { showToast('Nenhuma figurinha válida encontrada.'); return; }
 
     fetch('/api/sticker/bulk', {

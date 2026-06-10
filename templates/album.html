@@ -18,6 +18,7 @@
                 <button class="sort-btn active" data-mode="album" data-scope="main" onclick="sortCurrent('album')">📋 Álbum</button>
                 <button class="sort-btn" data-mode="prefix" data-scope="main" onclick="sortCurrent('prefix')">ABC</button>
                 <button class="sort-btn" data-mode="alpha" data-scope="main" onclick="sortCurrent('alpha')">A–Z</button>
+                <button class="sort-btn hidden" data-mode="qty" data-scope="main" onclick="sortCurrent('qty')">×Qtd</button>
             </div>
             {% if is_own_album %}
             <div class="view-controls">
@@ -43,7 +44,7 @@
             <span class="chip chip-blue">📘 {{ stats.owned }}/{{ stats.total }}</span>
             <span class="chip chip-orange">🔄 {{ stats.trading }}</span>
             <span class="chip chip-purple">📦 {{ stats.full }}</span>
-            <span class="chip chip-green">🎲 {{ stats.probability }}%/pacote</span>
+            <span class="chip chip-green" title="Chance de abrir pelo menos 1 figurinha nova em um pacote de 7">🎲 {{ stats.probability }}%/pacote</span>
         </div>
         {% if is_own_album %}
         <button class="copy-btn" onclick="copyOwnedList()" title="Copiar figurinhas que tenho">📋 Copiar</button>
@@ -104,8 +105,11 @@
     {% if has_any.v %}
     <div class="rep-list-topbar">
         <div class="stats-row">
-            <p class="rep-list-header">{{ stats.trading }} figurina{{ 's' if stats.trading != 1 else '' }} para trocar</p>
-            <button class="copy-btn" onclick="copyRepList()">📋 Copiar</button>
+            <p class="rep-list-header" id="rep-list-header">{{ stats.trading }} figurina{{ 's' if stats.trading != 1 else '' }} para trocar</p>
+            <div style="display:flex;gap:6px">
+                <button class="copy-btn" onclick="copyRepList()">📋 Copiar</button>
+                <button class="rep-clear-btn" onclick="clearAllRepetidas()">🗑 Limpar tudo</button>
+            </div>
         </div>
     </div>
     <div class="rep-add-bar">
@@ -124,6 +128,7 @@
     <div class="rep-list-item"
          data-country="{{ country.name }}"
          data-number="{{ num }}"
+         data-qty="{{ qty }}"
          data-prefix="{{ country.prefix }}"
          data-sort-name="{{ country.sort_name }}"
          data-album-index="{{ country.album_index }}">
@@ -173,6 +178,9 @@
             {% if country.page %}<span class="country-page">Pág. {{ country.page }}</span>{% endif %}
         </span>
         <div class="country-meta">
+            <div class="country-mini-bar">
+                <div class="country-mini-fill" style="width:{{ (country.owned_count / country.count * 100) | round(1) }}%"></div>
+            </div>
             <span class="country-count" id="cnt-{{ loop.index }}">{{ country.owned_count }}/{{ country.count }}</span>
             <button class="btn-repetidas" onclick="toggleRepetidas(this); event.stopPropagation()">
                 🔄 <span class="rep-count">({{ country.trading_count }})</span>
@@ -338,12 +346,12 @@
                 <span class="match-label">Você tem para ele ({{ m.i_give_total }}):</span>
                 <span class="match-stickers">
                     {% for c, n in m.i_give[:6] %}
-                    <span class="trade-chip muted">{{ c.split('(')[0].strip() if '(' in c else c }} #{{ n }}</span>
+                    <span class="trade-chip give">{{ c.split('(')[0].strip() if '(' in c else c }} #{{ n }}</span>
                     {% endfor %}
                     {% if m.i_give_total > 6 %}
                     <span class="match-stickers-hidden" id="match-i-more-{{ loop.index }}" style="display:none">
                         {% for c, n in m.i_give[6:] %}
-                        <span class="trade-chip muted">{{ c.split('(')[0].strip() if '(' in c else c }} #{{ n }}</span>
+                        <span class="trade-chip give">{{ c.split('(')[0].strip() if '(' in c else c }} #{{ n }}</span>
                         {% endfor %}
                     </span>
                     <button class="btn-ver-mais" onclick="toggleVerMais('match-i-more-{{ loop.index }}', this)">

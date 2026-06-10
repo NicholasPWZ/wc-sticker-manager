@@ -400,6 +400,16 @@ async def update_trading(request: Request, db: Session = Depends(get_db)):
     return JSONResponse({"quantity": 0})
 
 
+@router.post("/api/sticker/trade/clear-all")
+async def clear_all_trading(request: Request, db: Session = Depends(get_db)):
+    current_user = get_user_from_request(request, db)
+    if not current_user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    db.query(TradingSticker).filter(TradingSticker.user_id == current_user.id).delete()
+    db.commit()
+    return JSONResponse({"ok": True})
+
+
 @router.post("/api/wishlist/toggle")
 async def toggle_wishlist(request: Request, db: Session = Depends(get_db)):
     current_user = get_user_from_request(request, db)
