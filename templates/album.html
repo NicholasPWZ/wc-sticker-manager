@@ -383,6 +383,10 @@
             </button>
         </div>
         {% endfor %}
+        <div class="matches-summary">
+            <span>🎯</span>
+            <span>Somando todos os matches, você pode receber <strong>{{ matches_unique_total }}</strong> figurinha{{ 's' if matches_unique_total != 1 else '' }} única{{ 's' if matches_unique_total != 1 else '' }} sem repetição</span>
+        </div>
     </div>
 </section>
 {% endif %}

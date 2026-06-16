@@ -195,6 +195,7 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
 
     # Matches (own album only)
     matches = compute_matches(current_user.id, db) if is_own else []
+    matches_unique_total = len({(c, n) for m in matches for c, n in m["they_give"]})
 
     # Always load current user's trading stickers (needed for trade modal on own album matches too)
     trade_rows = db.query(TradingSticker).filter(
@@ -274,6 +275,7 @@ async def view_album(user_id: int, request: Request, db: Session = Depends(get_d
         },
         "missing_by_country": missing_by_country,
         "matches": matches,
+        "matches_unique_total": matches_unique_total,
         "incoming_trades": incoming_trades,
         "outgoing_trades": outgoing_trades,
         "past_trades": past_trades,

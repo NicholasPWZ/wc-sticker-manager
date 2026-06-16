@@ -289,6 +289,10 @@ button, a { touch-action: manipulation; }
 [data-theme="dark"] .section-toggle-btn { color: var(--text); }
 .match-count { color: var(--text-muted); font-weight: 400; }
 .matches-body { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.matches-summary { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #e8f4fd; border-radius: 8px; font-size: 13px; border: 1px solid #c3dff7; }
+[data-theme="dark"] .matches-summary { background: #0d1f35; border-color: #1e3a5f; }
+.matches-summary strong { color: var(--primary); font-size: 15px; }
+[data-theme="dark"] .matches-summary strong { color: #7ab8ff; }
 .match-card { background: var(--card-bg); border-radius: var(--radius); border: 1.5px solid var(--border); padding: 12px 14px; }
 .match-card.match-mutual { border-color: var(--accent); }
 .match-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
