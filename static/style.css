@@ -492,11 +492,11 @@ button, a { touch-action: manipulation; }
     .country-name { font-size: 13px; }
     .country-count { font-size: 11px; }
     .btn-repetidas { font-size: 11px; padding: 3px 8px; }
-    /* Closed state on mobile: show only 3-letter code */
-    .country-name-abbr { display: inline; }
-    .country-name-long { display: none; }
-    .country-card.open .country-name-abbr { display: none; }
-    .country-card.open .country-name-long { display: flex; }
+    /* Closed state on mobile: show only 3-letter code + page */
+    .country-card .country-name-abbr { display: inline !important; }
+    .country-card .country-name-long { display: none !important; }
+    .country-card.open .country-name-abbr { display: none !important; }
+    .country-card.open .country-name-long { display: inline !important; }
     /* Also hide mini-bar and complete button when closed */
     .country-card:not(.open) .country-mini-bar { display: none; }
     .country-card:not(.open) .btn-complete-country { display: none; }

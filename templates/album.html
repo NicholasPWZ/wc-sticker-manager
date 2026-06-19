@@ -179,8 +179,8 @@
             <span class="country-name-long">
                 {{ country.prefix }}
                 {% if '(' in country.name %}<span class="country-name-code">({{ country.name.split('(')[1].rstrip(')') }})</span>{% endif %}
-                {% if country.page %}<span class="country-page">Pág. {{ country.page }}</span>{% endif %}
             </span>
+            {% if country.page %}<span class="country-page">Pág. {{ country.page }}</span>{% endif %}
         </span>
         <div class="country-meta">
             <div class="country-mini-bar">
