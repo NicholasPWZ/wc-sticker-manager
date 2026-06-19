@@ -584,10 +584,14 @@ function toggleCountry(header) {
     const card = header.closest('.country-card');
     const grid = card.querySelector('.stickers-grid');
     const chevron = header.querySelector('.country-chevron');
+    const abbr = card.querySelector('.country-name-abbr');
+    const nameL = card.querySelector('.country-name-long');
     const isOpen = !grid.classList.contains('hidden');
     grid.classList.toggle('hidden', isOpen);
     card.classList.toggle('open', !isOpen);
     chevron.textContent = isOpen ? '▶' : '▼';
+    if (abbr) abbr.style.display = isOpen ? 'inline' : 'none';
+    if (nameL) nameL.style.display = isOpen ? 'none' : 'flex';
 }
 
 function toggleRepetidas(btn) {

@@ -176,7 +176,7 @@
             {% elif country.code == 'coca' %}<span class="flag-emoji">🥤</span>
             {% else %}<img class="flag-img" src="https://flagcdn.com/w40/{{ country.code }}.png" alt="">{% endif %}
             <span class="country-name-abbr">{{ country.name.split('(')[1].rstrip(')') if '(' in country.name else country.prefix }}</span>
-            <span class="country-name-long">
+            <span class="country-name-long" style="display:none">
                 {{ country.prefix }}
                 {% if '(' in country.name %}<span class="country-name-code">({{ country.name.split('(')[1].rstrip(')') }})</span>{% endif %}
             </span>
