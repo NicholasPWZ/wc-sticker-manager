@@ -175,11 +175,10 @@
             {% if country.code == 'fwc' %}<img class="flag-img" src="https://digitalhub.fifa.com/transform/157d23bf-7e13-4d7b-949e-5d27d340987e/WC26_Logo?&io=transform:fill&quality=75" alt="WC26">
             {% elif country.code == 'coca' %}<span class="flag-emoji">🥤</span>
             {% else %}<img class="flag-img" src="https://flagcdn.com/w40/{{ country.code }}.png" alt="">{% endif %}
-            <span class="country-name-abbr">{{ country.name.split('(')[1].rstrip(')') if '(' in country.name else country.prefix }}</span>
-            <span class="country-name-long" style="display:none">
-                {{ country.prefix }}
-                {% if '(' in country.name %}<span class="country-name-code">({{ country.name.split('(')[1].rstrip(')') }})</span>{% endif %}
-            </span>
+            <span class="country-name-display"
+                  data-abbr="{{ country.name.split('(')[1].rstrip(')') if '(' in country.name else country.prefix }}"
+                  data-prefix="{{ country.prefix | e }}"
+                  data-code="{{ country.name.split('(')[1].rstrip(')') if '(' in country.name else '' }}">{{ country.name.split('(')[1].rstrip(')') if '(' in country.name else country.prefix }}</span>
             {% if country.page %}<span class="country-page">Pág. {{ country.page }}</span>{% endif %}
         </span>
         <div class="country-meta">

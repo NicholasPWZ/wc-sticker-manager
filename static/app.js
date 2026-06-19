@@ -584,14 +584,30 @@ function toggleCountry(header) {
     const card = header.closest('.country-card');
     const grid = card.querySelector('.stickers-grid');
     const chevron = header.querySelector('.country-chevron');
-    const abbr = card.querySelector('.country-name-abbr');
-    const nameL = card.querySelector('.country-name-long');
+    const display = card.querySelector('.country-name-display');
     const isOpen = !grid.classList.contains('hidden');
     grid.classList.toggle('hidden', isOpen);
     card.classList.toggle('open', !isOpen);
     chevron.textContent = isOpen ? '▶' : '▼';
-    if (abbr) abbr.style.display = isOpen ? 'inline' : 'none';
-    if (nameL) nameL.style.display = isOpen ? 'none' : 'flex';
+    if (display) {
+        if (isOpen) {
+            // closing → show abbreviation
+            display.textContent = display.dataset.abbr;
+        } else {
+            // opening → show full name
+            const prefix = display.dataset.prefix;
+            const code = display.dataset.code;
+            display.textContent = '';
+            display.appendChild(document.createTextNode(prefix));
+            if (code) {
+                display.appendChild(document.createTextNode(' '));
+                const codeSpan = document.createElement('span');
+                codeSpan.className = 'country-name-code';
+                codeSpan.textContent = '(' + code + ')';
+                display.appendChild(codeSpan);
+            }
+        }
+    }
 }
 
 function toggleRepetidas(btn) {

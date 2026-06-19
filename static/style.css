@@ -215,10 +215,7 @@ button, a { touch-action: manipulation; }
 .country-header:hover { opacity: 0.85; }
 .country-chevron { font-size: 9px; color: var(--text-muted); flex-shrink: 0; }
 .country-name { font-weight: 700; font-size: 14px; color: var(--primary); display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow: hidden; }
-.country-name-abbr { display: inline; }
-.country-name-long { display: none; }
-.country-card.open .country-name-abbr { display: none; }
-.country-card.open .country-name-long { display: flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.country-name-display { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .country-card:not(.open) .country-mini-bar { display: none; }
 .country-card:not(.open) .btn-complete-country { display: none; }
 .country-name-code { font-size: 11px; font-weight: 400; color: var(--text-muted); white-space: nowrap; }
