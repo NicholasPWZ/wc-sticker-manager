@@ -591,20 +591,19 @@ function toggleCountry(header) {
     chevron.textContent = isOpen ? '▶' : '▼';
     if (display) {
         if (isOpen) {
-            // closing → show abbreviation
-            display.textContent = display.dataset.abbr;
+            // closing → show just the code e.g. "BRA"
+            display.textContent = display.dataset.closed;
         } else {
-            // opening → show full name
-            const prefix = display.dataset.prefix;
-            const code = display.dataset.code;
+            // opening → show full e.g. "BRA (Brasil)"
             display.textContent = '';
-            display.appendChild(document.createTextNode(prefix));
-            if (code) {
+            display.appendChild(document.createTextNode(display.dataset.prefix));
+            const fullname = display.dataset.fullname;
+            if (fullname) {
                 display.appendChild(document.createTextNode(' '));
-                const codeSpan = document.createElement('span');
-                codeSpan.className = 'country-name-code';
-                codeSpan.textContent = '(' + code + ')';
-                display.appendChild(codeSpan);
+                const s = document.createElement('span');
+                s.className = 'country-name-code';
+                s.textContent = '(' + fullname + ')';
+                display.appendChild(s);
             }
         }
     }

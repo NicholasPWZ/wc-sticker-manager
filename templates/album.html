@@ -176,9 +176,9 @@
             {% elif country.code == 'coca' %}<span class="flag-emoji">🥤</span>
             {% else %}<img class="flag-img" src="https://flagcdn.com/w40/{{ country.code }}.png" alt="">{% endif %}
             <span class="country-name-display"
-                  data-abbr="{{ country.name.split('(')[1].rstrip(')') if '(' in country.name else country.prefix }}"
+                  data-closed="{{ country.prefix | e }}"
                   data-prefix="{{ country.prefix | e }}"
-                  data-code="{{ country.name.split('(')[1].rstrip(')') if '(' in country.name else '' }}">{{ country.name.split('(')[1].rstrip(')') if '(' in country.name else country.prefix }}</span>
+                  data-fullname="{{ country.name.split('(')[1].rstrip(')') | e if '(' in country.name else '' }}">{{ country.prefix | e }}</span>
             {% if country.page %}<span class="country-page">Pág. {{ country.page }}</span>{% endif %}
         </span>
         <div class="country-meta">
